@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Keyboard, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  Text,
+  Vibration,
+  View,
+} from "react-native";
 import { Stack, useNavigation } from "expo-router";
 import {
   BackIcon,
@@ -22,6 +29,7 @@ export default function Playing() {
   const navigation = useNavigation();
 
   const handlePress = (flag: string) => {
+    Vibration.vibrate(10);
     return;
   };
 
