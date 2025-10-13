@@ -1,7 +1,7 @@
 import { CogIcon } from "@/components/ui/Icons";
 import { Theme } from "@/libs/consts";
 import { Link, Stack } from "expo-router";
-import { Image, Pressable, View } from "react-native";
+import { Image, Pressable } from "react-native";
 import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import SplashScreen from "@/components/ui/SplashScreen";

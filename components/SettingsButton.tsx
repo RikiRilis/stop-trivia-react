@@ -1,13 +1,13 @@
-import { PlatformPressable } from "@react-navigation/elements";
-import { ReactElement } from "react";
-import { Text, View } from "react-native";
-import { Theme } from "@/libs/consts";
+import { PlatformPressable } from "@react-navigation/elements"
+import { ReactElement } from "react"
+import { Text, View } from "react-native"
+import { Theme } from "@/libs/consts"
 
 interface SettingsButtonProps {
-  onPress: () => void;
-  title: string;
-  description: string;
-  icon: ReactElement;
+  onPress: () => void
+  title: string
+  description: string
+  icon: ReactElement
 }
 
 export const SettingsButton = ({
@@ -34,5 +34,5 @@ export const SettingsButton = ({
         <Text style={{ color: Theme.colors.darkGray }}>{description}</Text>
       </View>
     </PlatformPressable>
-  );
-};
+  )
+}

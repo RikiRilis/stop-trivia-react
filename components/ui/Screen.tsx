@@ -1,5 +1,5 @@
-import { Theme } from "@/libs/consts";
-import { View } from "react-native";
+import { Theme } from "@/libs/consts"
+import { View } from "react-native"
 
 export function Screen({ children }: { children: React.ReactNode }) {
   return (
@@ -13,5 +13,5 @@ export function Screen({ children }: { children: React.ReactNode }) {
     >
       {children}
     </View>
-  );
+  )
 }

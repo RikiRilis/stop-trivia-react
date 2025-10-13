@@ -1,14 +1,14 @@
-import { Player } from "@/interfaces/Player";
+import { Player } from "@/interfaces/Player"
 
 export interface GameModel {
-  gameId: string;
-  round: number;
-  currentLetter: string;
-  currentTime: number;
-  gameStatus: GameStatus;
-  players: number;
-  playersReady: number;
-  playersNames: Player[];
+  gameId: string
+  round: number
+  currentLetter: string
+  currentTime: number
+  gameStatus: GameStatus
+  players: number
+  playersReady: number
+  playersNames: Player[]
 }
 
 export enum GameStatus {

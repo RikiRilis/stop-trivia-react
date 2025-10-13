@@ -1,5 +1,5 @@
-import { Theme } from "@/libs/consts";
-import { View } from "react-native";
+import { Theme } from "@/libs/consts"
+import { View } from "react-native"
 
 export const Divider = () => {
   return (
@@ -10,5 +10,5 @@ export const Divider = () => {
         backgroundColor: Theme.colors.darkGray,
       }}
     />
-  );
-};
+  )
+}

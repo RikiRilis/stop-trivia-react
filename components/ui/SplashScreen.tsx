@@ -1,12 +1,12 @@
-import LottieView from "lottie-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ic from "@/assets/lotties/ic_brand.json";
-import { Theme } from "@/libs/consts";
+import LottieView from "lottie-react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import ic from "@/assets/lotties/ic_brand.json"
+import { Theme } from "@/libs/consts"
 
 export default function SplashScreen({
   onFinish = (isCancelled) => {},
 }: {
-  onFinish: (isCancelled: boolean) => void;
+  onFinish: (isCancelled: boolean) => void
 }) {
   return (
     <SafeAreaView
@@ -22,11 +22,12 @@ export default function SplashScreen({
         source={ic}
         autoPlay
         loop={false}
+        duration={3000}
         style={{
           flex: 1,
           width: "50%",
         }}
       />
     </SafeAreaView>
-  );
+  )
 }

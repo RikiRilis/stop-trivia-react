@@ -1,31 +1,31 @@
-import { View, StyleSheet, LayoutChangeEvent, Vibration } from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Theme } from "@/libs/consts";
-import { TabBarButton } from "../TabBarButton";
-import { useState } from "react";
+import { View, StyleSheet, LayoutChangeEvent, Vibration } from "react-native"
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
+import { Theme } from "@/libs/consts"
+import { TabBarButton } from "../TabBarButton"
+import { useState } from "react"
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from "react-native-reanimated";
+} from "react-native-reanimated"
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
-  const [dimensions, setDimensions] = useState({ height: 20, width: 100 });
-  const buttonWidth = dimensions.width / state.routes.length;
+  const [dimensions, setDimensions] = useState({ height: 20, width: 100 })
+  const buttonWidth = dimensions.width / state.routes.length
 
   const onTabbarLayout = (e: LayoutChangeEvent) => {
     setDimensions({
       height: e.nativeEvent.layout.height,
       width: e.nativeEvent.layout.width,
-    });
-  };
+    })
+  }
 
-  const tabPositionX = useSharedValue(0);
+  const tabPositionX = useSharedValue(0)
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: tabPositionX.value }],
-    };
-  });
+    }
+  })
 
   return (
     <View onLayout={onTabbarLayout} style={styles.tabbar}>
@@ -44,39 +44,39 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       />
 
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
+        const { options } = descriptors[route.key]
         const label =
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
               ? options.title
-              : route.name;
+              : route.name
 
-        const isFocused = state.index === index;
+        const isFocused = state.index === index
 
         const onPress = () => {
-          Vibration.vibrate(10);
+          Vibration.vibrate(10)
           tabPositionX.value = withSpring(buttonWidth * index, {
             duration: 500,
-          });
+          })
 
           const event = navigation.emit({
             type: "tabPress",
             target: route.key,
             canPreventDefault: true,
-          });
+          })
 
           if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+            navigation.navigate(route.name, route.params)
           }
-        };
+        }
 
         const onLongPress = () => {
           navigation.emit({
             type: "tabLongPress",
             target: route.key,
-          });
-        };
+          })
+        }
 
         return (
           <TabBarButton
@@ -111,10 +111,10 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           //       {label}
           //     </Text>
           //   </PlatformPressable>
-        );
+        )
       })}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -139,4 +139,4 @@ const styles = StyleSheet.create({
   //     alignItems: "center",
   //     gap: 4,
   //   },
-});
+})

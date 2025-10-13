@@ -1,5 +1,5 @@
-import { Theme } from "@/libs/consts";
-import React from "react";
+import { Theme } from "@/libs/consts"
+import React, { useEffect, useState } from "react"
 import {
   View,
   Text,
@@ -7,24 +7,40 @@ import {
   Pressable,
   StyleSheet,
   Vibration,
-} from "react-native";
+} from "react-native"
 import {
   ForwardIcon,
   GameIcon,
   LinkIcon,
   OfflineIcon,
   OnlineIcon,
-} from "@/components/ui/Icons";
-import { Screen } from "@/components/ui/Screen";
-import { useRouter } from "expo-router";
+} from "@/components/ui/Icons"
+import { Screen } from "@/components/ui/Screen"
+import { useRouter } from "expo-router"
+import { useStorage } from "@/hooks/useStorage"
+import { parseBoolean } from "@/libs/parseBoolean"
 
 export default function Index() {
-  const navigation = useRouter();
+  const navigation = useRouter()
+  const { getItem } = useStorage()
+  const [vibrationEnabled, setVibrationEnabled] = useState(true)
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const vibrationValue = await getItem("vibration")
+      setVibrationEnabled(parseBoolean(vibrationValue))
+    }
+
+    loadSettings()
+  }, [])
 
   const handlePress = (flag: string) => {
-    Vibration.vibrate(10);
-    navigation.navigate("playing");
-  };
+    if (vibrationEnabled) {
+      Vibration.vibrate(10)
+    }
+
+    navigation.navigate("playing")
+  }
 
   return (
     <Screen>
@@ -165,7 +181,7 @@ export default function Index() {
         </Pressable>
       </View>
     </Screen>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -178,4 +194,4 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 18,
   },
-});
+})

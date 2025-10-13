@@ -1,21 +1,21 @@
-import React, { useEffect } from "react";
-import { Text, StyleSheet } from "react-native";
-import { HomeIcon, StatsIcon } from "@/components/ui/Icons";
-import { PlatformPressable } from "@react-navigation/elements";
-import { Theme } from "@/libs/consts";
+import React, { useEffect } from "react"
+import { StyleSheet } from "react-native"
+import { HomeIcon, StatsIcon } from "@/components/ui/Icons"
+import { PlatformPressable } from "@react-navigation/elements"
+import { Theme } from "@/libs/consts"
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from "react-native-reanimated";
+} from "react-native-reanimated"
 
 interface Props {
-  onPress: Function;
-  onLongPress: Function;
-  isFocused: boolean;
-  routeName: string;
-  label: string;
+  onPress: Function
+  onLongPress: Function
+  isFocused: boolean
+  routeName: string
+  label: string
 }
 
 export const TabBarButton = ({
@@ -28,27 +28,27 @@ export const TabBarButton = ({
   const icon = {
     index: (props: any) => <HomeIcon {...props} />,
     stats: (props: any) => <StatsIcon {...props} />,
-  };
+  }
 
-  const scale = useSharedValue(0);
+  const scale = useSharedValue(0)
 
   useEffect(() => {
     scale.value = withSpring(
       typeof isFocused === "boolean" ? (isFocused ? 1 : 0) : isFocused,
       { duration: 200 }
-    );
-  }, [scale, isFocused]);
+    )
+  }, [scale, isFocused])
 
   const animatedTextStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scale.value, [0, 1], [1, 0]);
-    return { opacity };
-  });
+    const opacity = interpolate(scale.value, [0, 1], [1, 0])
+    return { opacity }
+  })
 
   const animatedIconStyle = useAnimatedStyle(() => {
-    const scaleValue = interpolate(scale.value, [0, 1], [1, 1.2]);
-    const top = interpolate(scale.value, [0, 1], [0, 9]);
-    return { transform: [{ scale: scaleValue }], top: top };
-  });
+    const scaleValue = interpolate(scale.value, [0, 1], [1, 1.2])
+    const top = interpolate(scale.value, [0, 1], [0, 9])
+    return { transform: [{ scale: scaleValue }], top: top }
+  })
 
   return (
     <PlatformPressable
@@ -75,8 +75,8 @@ export const TabBarButton = ({
         {label}
       </Animated.Text>
     </PlatformPressable>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   tabbarItem: {
@@ -85,4 +85,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-});
+})

@@ -1,13 +1,13 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Entypo from "@expo/vector-icons/Entypo";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Octicons from "@expo/vector-icons/Octicons";
-import Feather from "@expo/vector-icons/Feather";
-import { Theme } from "@/libs/consts";
+import Ionicons from "@expo/vector-icons/Ionicons"
+import FontAwesome from "@expo/vector-icons/FontAwesome"
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
+import Entypo from "@expo/vector-icons/Entypo"
+import MaterialIcons from "@expo/vector-icons/MaterialIcons"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import AntDesign from "@expo/vector-icons/AntDesign"
+import Octicons from "@expo/vector-icons/Octicons"
+import Feather from "@expo/vector-icons/Feather"
+import { Theme } from "@/libs/consts"
 
 export const RestartIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -16,7 +16,7 @@ export const RestartIcon = (props: any) => (
     size={24}
     {...props}
   />
-);
+)
 
 export const CheckIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -25,7 +25,7 @@ export const CheckIcon = (props: any) => (
     size={24}
     {...props}
   />
-);
+)
 
 export const PlayIcon = (props: any) => (
   <Ionicons
@@ -34,15 +34,15 @@ export const PlayIcon = (props: any) => (
     size={24}
     {...props}
   />
-);
+)
 
 export const UsersIcon = (props: any) => (
   <Feather name="users" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const LinkIcon = (props: any) => (
   <Octicons name="link" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const OfflineIcon = (props: any) => (
   <Octicons
@@ -51,27 +51,27 @@ export const OfflineIcon = (props: any) => (
     size={24}
     {...props}
   />
-);
+)
 
 export const GameIcon = (props: any) => (
   <FontAwesome5 name="gamepad" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const OnlineIcon = (props: any) => (
   <Octicons name="cloud" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const BackIcon = (props: any) => (
   <Entypo name="chevron-left" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const ForwardIcon = (props: any) => (
   <Entypo name="chevron-right" color={Theme.colors.text} size={24} {...props} />
-);
+)
 
 export const CogIcon = (props: any) => (
   <FontAwesome name="cog" size={24} color={Theme.colors.text} {...props} />
-);
+)
 
 export const InfoIcon = (props: any) => (
   <FontAwesome
@@ -80,15 +80,15 @@ export const InfoIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const HomeIcon = (props: any) => (
   <FontAwesome5 name="home" size={24} color={Theme.colors.text} {...props} />
-);
+)
 
 export const StatsIcon = (props: any) => (
   <Ionicons name="stats-chart" size={24} color={Theme.colors.text} {...props} />
-);
+)
 
 export const VibrationIcon = (props: any) => (
   <MaterialIcons
@@ -97,7 +97,7 @@ export const VibrationIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const PrivacyIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -106,7 +106,7 @@ export const PrivacyIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const WebIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -115,7 +115,7 @@ export const WebIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const LogoutIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -124,7 +124,7 @@ export const LogoutIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const ListIcon = (props: any) => (
   <MaterialCommunityIcons
@@ -133,8 +133,8 @@ export const ListIcon = (props: any) => (
     color={Theme.colors.text}
     {...props}
   />
-);
+)
 
 export const SoundIcon = (props: any) => (
   <AntDesign name="sound" size={24} color={Theme.colors.text} {...props} />
-);
+)

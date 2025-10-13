@@ -1,7 +1,7 @@
-import { Tabs } from "expo-router";
-import { HomeIcon, StatsIcon } from "@/components/ui/Icons";
-import { Theme } from "@/libs/consts";
-import { TabBar } from "@/components/ui/TabBar";
+import { Tabs } from "expo-router"
+import { HomeIcon, StatsIcon } from "@/components/ui/Icons"
+import { Theme } from "@/libs/consts"
+import { TabBar } from "@/components/ui/TabBar"
 
 export default function TabsLayout() {
   return (
@@ -32,5 +32,5 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
-  );
+  )
 }

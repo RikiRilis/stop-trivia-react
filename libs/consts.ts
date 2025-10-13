@@ -15,4 +15,4 @@ export const Theme = {
     darkGray: "#696969",
     border: "#333333",
   },
-};
+}
