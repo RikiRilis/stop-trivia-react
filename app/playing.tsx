@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Children, useState } from "react"
 import {
   Keyboard,
   Pressable,
@@ -6,32 +6,35 @@ import {
   Text,
   Vibration,
   View,
-} from "react-native";
-import { Stack, useNavigation } from "expo-router";
+  Image,
+} from "react-native"
+import { Stack, useNavigation } from "expo-router"
 import {
   BackIcon,
   CheckIcon,
   PlayIcon,
   RestartIcon,
   UsersIcon,
-} from "@/components/ui/Icons";
-import { Screen } from "@/components/ui/Screen";
-import { Theme } from "@/libs/consts";
-import { FocusInput } from "@/components/FocusInput";
+} from "@/components/ui/Icons"
+import { Screen } from "@/components/ui/Screen"
+import { Theme } from "@/libs/consts"
+import { FocusInput } from "@/components/FocusInput"
+import { PlayingButton } from "@/components/PlayingButton"
 
 export default function Playing() {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [players, setPlayers] = useState<number>(1);
-  const [round, setRound] = useState<number>(1);
-  const [letter, setLetter] = useState<string>("A");
-  const [points, setPoints] = useState<number>(100);
+  const [loading, setLoading] = useState<boolean>(true)
+  const [players, setPlayers] = useState<number>(1)
+  const [round, setRound] = useState<number>(1)
+  const [letter, setLetter] = useState<string>("A")
+  const [points, setPoints] = useState<number>(100)
 
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   const handlePress = (flag: string) => {
-    Vibration.vibrate(10);
-    return;
-  };
+    console.log(flag)
+    Vibration.vibrate(10)
+    return
+  }
 
   return (
     <Screen>
@@ -95,64 +98,37 @@ export default function Playing() {
                 alignItems: "center",
               }}
             >
-              <Pressable
+              <PlayingButton
+                flag="play"
                 onPress={() => handlePress("play")}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <PlayIcon size={30} />
-              </Pressable>
-              <Pressable
+                icon={<PlayIcon size={30} />}
+              />
+              <PlayingButton
+                flag="play"
                 onPress={() => handlePress("ready")}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <CheckIcon size={30} />
-              </Pressable>
-              <Pressable
+                icon={<CheckIcon size={30} />}
+              />
+              <PlayingButton
+                flag="play"
                 onPress={() => handlePress("stop")}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <PlayIcon size={30} />
-              </Pressable>
-              <Pressable
+                icon={
+                  <Image
+                    source={require("@/assets/ic_brand.png")}
+                    style={{ width: 30, height: 30 }}
+                  />
+                }
+              />
+              <PlayingButton
+                flag="play"
                 onPress={() => handlePress("restart")}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <RestartIcon size={30} />
-              </Pressable>
+                icon={<RestartIcon size={30} />}
+              />
             </View>
           </View>
         </View>
       </Pressable>
     </Screen>
-  );
+  )
 }
 
 const CurrentPlayers = ({ players }: { players: number }) => {
@@ -170,8 +146,8 @@ const CurrentPlayers = ({ players }: { players: number }) => {
         {players}/4
       </Text>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   columns: {
@@ -190,4 +166,4 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     fontFamily: "OnestBold",
   },
-});
+})
