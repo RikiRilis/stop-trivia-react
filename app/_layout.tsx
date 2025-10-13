@@ -7,6 +7,7 @@ import React, { useState } from "react"
 import SplashScreen from "@/components/ui/SplashScreen"
 import { StatusBar } from "expo-status-bar"
 import { SafeAreaProvider } from "react-native-safe-area-context"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
@@ -29,34 +30,37 @@ export default function Layout() {
       style={{ height: "100%", backgroundColor: Theme.colors.background }}
     >
       <StatusBar style="auto" />
-      <Stack
-        screenOptions={{
-          animationMatchesGesture: true,
-          animation: "default",
-          animationDuration: 100,
-          contentStyle: { backgroundColor: Theme.colors.background },
-          headerStyle: { backgroundColor: Theme.colors.background },
-          headerTintColor: Theme.colors.text,
-          headerTitle: "Stop Trivia",
-          headerTitleStyle: {
-            fontSize: 24,
-            fontFamily: "OnestBold",
-          },
-          headerLeft: () => (
-            <Image
-              source={require("@/assets/ic_brand.png")}
-              style={{ width: 40, height: 40 }}
-            />
-          ),
-          headerRight: () => (
-            <Link asChild href="/settings">
-              <Pressable>
-                <CogIcon />
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
+
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack
+          screenOptions={{
+            animationMatchesGesture: true,
+            animation: "default",
+            animationDuration: 100,
+            contentStyle: { backgroundColor: Theme.colors.background },
+            headerStyle: { backgroundColor: Theme.colors.background },
+            headerTintColor: Theme.colors.text,
+            headerTitle: "Stop Trivia",
+            headerTitleStyle: {
+              fontSize: 24,
+              fontFamily: "OnestBold",
+            },
+            headerLeft: () => (
+              <Image
+                source={require("@/assets/ic_brand.png")}
+                style={{ width: 40, height: 40 }}
+              />
+            ),
+            headerRight: () => (
+              <Link asChild href="/settings">
+                <Pressable>
+                  <CogIcon />
+                </Pressable>
+              </Link>
+            ),
+          }}
+        />
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   )
 }

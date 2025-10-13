@@ -27,6 +27,14 @@ export const CheckIcon = (props: any) => (
   />
 )
 
+export const CloseIcon = (props: any) => (
+  <Ionicons name="close" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const LanguageIcon = (props: any) => (
+  <Ionicons name="language" color={Theme.colors.text} size={24} {...props} />
+)
+
 export const PlayIcon = (props: any) => (
   <Ionicons
     name="play-outline"

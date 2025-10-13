@@ -10,7 +10,6 @@ import {
 } from "react-native"
 import {
   ForwardIcon,
-  GameIcon,
   LinkIcon,
   OfflineIcon,
   OnlineIcon,
@@ -19,6 +18,8 @@ import { Screen } from "@/components/ui/Screen"
 import { useFocusEffect, useRouter } from "expo-router"
 import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
+import LottieView from "lottie-react-native"
+import ic from "@/assets/lotties/ic_gamepad.json"
 
 export default function Index() {
   const navigation = useRouter()
@@ -55,7 +56,17 @@ export default function Index() {
         >
           Choose your mode
         </Text>
-        {<GameIcon color={Theme.colors.accent}></GameIcon>}
+
+        <LottieView
+          source={ic}
+          autoPlay
+          loop={false}
+          duration={2000}
+          style={{
+            width: 24,
+            height: 24,
+          }}
+        />
       </View>
 
       <View

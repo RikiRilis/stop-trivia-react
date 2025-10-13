@@ -14,5 +14,6 @@ export const Theme = {
     lightGray: "#D3D3D3",
     darkGray: "#696969",
     border: "#333333",
+    modal: "#002523ff",
   },
 }
