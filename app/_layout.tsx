@@ -1,27 +1,27 @@
-import { CogIcon } from "@/components/ui/Icons";
-import { Theme } from "@/libs/consts";
-import { Link, Stack } from "expo-router";
-import { Image, Pressable } from "react-native";
-import { useFonts } from "expo-font";
-import React, { useState } from "react";
-import SplashScreen from "@/components/ui/SplashScreen";
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { CogIcon } from "@/components/ui/Icons"
+import { Theme } from "@/libs/consts"
+import { Link, Stack } from "expo-router"
+import { Image, Pressable } from "react-native"
+import { useFonts } from "expo-font"
+import React, { useState } from "react"
+import SplashScreen from "@/components/ui/SplashScreen"
+import { StatusBar } from "expo-status-bar"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
 export default function Layout() {
-  const [isAppReady, setIsAppReady] = useState(false);
+  const [isAppReady, setIsAppReady] = useState(false)
 
   const [loaded] = useFonts({
     Onest: require("../assets/fonts/onest-latin-400-normal.ttf"),
     OnestBold: require("../assets/fonts/onest-latin-800-normal.ttf"),
-  });
+  })
 
   if (!loaded || !isAppReady) {
     return (
       <SplashScreen
         onFinish={(isCancelled) => !isCancelled && setIsAppReady(true)}
       />
-    );
+    )
   }
 
   return (
@@ -58,5 +58,5 @@ export default function Layout() {
         }}
       />
     </SafeAreaProvider>
-  );
+  )
 }
