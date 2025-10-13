@@ -1,5 +1,5 @@
 import { Theme } from "@/libs/consts"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useState } from "react"
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
   OnlineIcon,
 } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
-import { useRouter } from "expo-router"
+import { useFocusEffect, useRouter } from "expo-router"
 import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
 
@@ -25,14 +25,15 @@ export default function Index() {
   const { getItem } = useStorage()
   const [vibrationEnabled, setVibrationEnabled] = useState(true)
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      const vibrationValue = await getItem("vibration")
-      setVibrationEnabled(parseBoolean(vibrationValue))
-    }
-
-    loadSettings()
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      const loadSettings = async () => {
+        const vibrationValue = await getItem("vibration")
+        setVibrationEnabled(parseBoolean(vibrationValue))
+      }
+      loadSettings()
+    }, [])
+  )
 
   const handlePress = (flag: string) => {
     if (vibrationEnabled) {

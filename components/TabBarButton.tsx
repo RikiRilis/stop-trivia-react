@@ -2,7 +2,6 @@ import React, { useEffect } from "react"
 import { StyleSheet } from "react-native"
 import { HomeIcon, StatsIcon } from "@/components/ui/Icons"
 import { PlatformPressable } from "@react-navigation/elements"
-import { Theme } from "@/libs/consts"
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -11,11 +10,12 @@ import Animated, {
 } from "react-native-reanimated"
 
 interface Props {
-  onPress: Function
-  onLongPress: Function
+  onPress: () => void
+  onLongPress: () => void
   isFocused: boolean
   routeName: string
   label: string
+  color: string
 }
 
 export const TabBarButton = ({
@@ -24,6 +24,7 @@ export const TabBarButton = ({
   isFocused,
   routeName,
   label,
+  color,
 }: Props) => {
   const icon = {
     index: (props: any) => <HomeIcon {...props} />,
@@ -58,13 +59,13 @@ export const TabBarButton = ({
     >
       <Animated.View style={animatedIconStyle}>
         {icon[routeName]({
-          color: isFocused ? Theme.colors.primary : Theme.colors.darkGray,
+          color: color,
         })}
       </Animated.View>
       <Animated.Text
         style={[
           {
-            color: isFocused ? Theme.colors.primary : Theme.colors.darkGray,
+            color: color,
             textAlign: "center",
             fontSize: 12,
             fontFamily: "Onest",

@@ -2,16 +2,32 @@ import { View, StyleSheet, LayoutChangeEvent, Vibration } from "react-native"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
 import { Theme } from "@/libs/consts"
 import { TabBarButton } from "../TabBarButton"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated"
+import { useFocusEffect } from "expo-router"
+import { useStorage } from "@/hooks/useStorage"
+import { parseBoolean } from "@/libs/parseBoolean"
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const [vibrationEnabled, setVibrationEnabled] = useState(true)
+  const { getItem } = useStorage()
+
   const [dimensions, setDimensions] = useState({ height: 20, width: 100 })
   const buttonWidth = dimensions.width / state.routes.length
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadSettings = async () => {
+        const vibrationValue = await getItem("vibration")
+        setVibrationEnabled(parseBoolean(vibrationValue))
+      }
+      loadSettings()
+    }, [])
+  )
 
   const onTabbarLayout = (e: LayoutChangeEvent) => {
     setDimensions({
@@ -55,7 +71,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const isFocused = state.index === index
 
         const onPress = () => {
-          Vibration.vibrate(10)
+          if (vibrationEnabled) {
+            Vibration.vibrate(10)
+          }
           tabPositionX.value = withSpring(buttonWidth * index, {
             duration: 500,
           })
@@ -85,8 +103,8 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             onLongPress={onLongPress}
             isFocused={isFocused}
             routeName={route.name}
+            label={label.toString()}
             color={isFocused ? Theme.colors.primary : Theme.colors.darkGray}
-            label={label}
           />
 
           //   <PlatformPressable

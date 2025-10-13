@@ -1,4 +1,4 @@
-import { SettingsButton } from "@/components/SettingsButton";
+import { SettingsButton } from "@/components/SettingsButton"
 import {
   BackIcon,
   ListIcon,
@@ -7,23 +7,57 @@ import {
   SoundIcon,
   VibrationIcon,
   WebIcon,
-} from "@/components/ui/Icons";
-import { Theme } from "@/libs/consts";
-import { PlatformPressable } from "@react-navigation/elements";
-import { Stack, useNavigation } from "expo-router";
-import { useState } from "react";
-import { Linking, ScrollView, Switch, Text, View } from "react-native";
-import { Divider } from "../components/Divider";
+} from "@/components/ui/Icons"
+import { Theme } from "@/libs/consts"
+import { PlatformPressable } from "@react-navigation/elements"
+import { Stack, useNavigation } from "expo-router"
+import { useEffect, useState } from "react"
+import {
+  Linking,
+  ScrollView,
+  Switch,
+  Text,
+  Vibration,
+  View,
+} from "react-native"
+import { Divider } from "../components/Divider"
+import { useStorage } from "@/hooks/useStorage"
+import { parseBoolean } from "@/libs/parseBoolean"
 
 export default function Settings() {
-  const navigation = useNavigation();
-  const [isVibrationEnabled, setIsVibrationEnabled] = useState(false);
-  const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+  const navigation = useNavigation()
+  const [isVibrationEnabled, setIsVibrationEnabled] = useState(false)
+  const [isSoundEnabled, setIsSoundEnabled] = useState(false)
+  const { setItem, getItem } = useStorage()
 
-  const toggleVibrationSwitch = () =>
-    setIsVibrationEnabled((previousState) => !previousState);
-  const toggleSoundSwitch = () =>
-    setIsSoundEnabled((previousState) => !previousState);
+  useEffect(() => {
+    const loadSettings = async () => {
+      const vibrationValue = await getItem("vibration")
+      const soundValue = await getItem("sound")
+
+      setIsVibrationEnabled(parseBoolean(vibrationValue))
+      setIsSoundEnabled(parseBoolean(soundValue))
+    }
+
+    loadSettings()
+  }, [])
+
+  const toggleVibrationSwitch = () => {
+    setIsVibrationEnabled((prev) => {
+      const newValue = !prev
+      setItem("vibration", String(newValue))
+      if (newValue) Vibration.vibrate(10)
+      return newValue
+    })
+  }
+
+  const toggleSoundSwitch = () => {
+    setIsSoundEnabled((prev) => {
+      const newValue = !prev
+      setItem("sound", String(newValue))
+      return newValue
+    })
+  }
 
   return (
     <ScrollView
@@ -169,5 +203,5 @@ export default function Settings() {
         </PlatformPressable>
       </View>
     </ScrollView>
-  );
+  )
 }
