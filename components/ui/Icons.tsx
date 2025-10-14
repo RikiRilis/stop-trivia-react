@@ -27,6 +27,15 @@ export const CheckIcon = (props: any) => (
   />
 )
 
+export const CopyIcon = (props: any) => (
+  <Ionicons
+    name="copy-outline"
+    color={Theme.colors.text}
+    size={24}
+    {...props}
+  />
+)
+
 export const CloseIcon = (props: any) => (
   <Ionicons name="close" color={Theme.colors.text} size={24} {...props} />
 )
@@ -44,8 +53,28 @@ export const PlayIcon = (props: any) => (
   />
 )
 
+export const UserIcon = (props: any) => (
+  <Feather name="user" color={Theme.colors.text} size={24} {...props} />
+)
+
 export const UsersIcon = (props: any) => (
   <Feather name="users" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const EyeIcon = (props: any) => (
+  <Octicons name="eye" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const EyeOffIcon = (props: any) => (
+  <Octicons name="eye-closed" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const LockIcon = (props: any) => (
+  <Octicons name="lock" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const MailIcon = (props: any) => (
+  <Octicons name="mail" color={Theme.colors.text} size={24} {...props} />
 )
 
 export const LinkIcon = (props: any) => (

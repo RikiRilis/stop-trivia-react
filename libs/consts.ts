@@ -15,5 +15,6 @@ export const Theme = {
     darkGray: "#696969",
     border: "#333333",
     modal: "#002523ff",
+    transparent: "#00000000",
   },
 }

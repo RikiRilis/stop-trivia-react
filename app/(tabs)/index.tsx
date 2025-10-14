@@ -1,30 +1,20 @@
 import { Theme } from "@/libs/consts"
 import React, { useCallback, useState } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  Vibration,
-} from "react-native"
-import {
-  ForwardIcon,
-  LinkIcon,
-  OfflineIcon,
-  OnlineIcon,
-} from "@/components/ui/Icons"
+import { View, Text, Vibration, Pressable, Keyboard } from "react-native"
+import { LinkIcon, OfflineIcon, OnlineIcon } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
 import { useFocusEffect, useRouter } from "expo-router"
 import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
 import LottieView from "lottie-react-native"
 import ic from "@/assets/lotties/ic_gamepad.json"
+import { ModesButton } from "@/components/ModesButton"
+import { FocusInput } from "@/components/FocusInput"
 
 export default function Index() {
   const navigation = useRouter()
-  const { getItem } = useStorage()
   const [vibrationEnabled, setVibrationEnabled] = useState(true)
+  const { getItem } = useStorage()
 
   useFocusEffect(
     useCallback(() => {
@@ -46,164 +36,61 @@ export default function Index() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", marginVertical: 16, gap: 12 }}>
-        <Text
+      <Pressable style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
+        <View style={{ flexDirection: "row", marginVertical: 16, gap: 12 }}>
+          <Text
+            style={{
+              color: Theme.colors.text,
+              fontSize: 18,
+              fontFamily: "Onest",
+            }}
+          >
+            Choose your mode
+          </Text>
+
+          <LottieView
+            source={ic}
+            autoPlay
+            loop={false}
+            duration={2000}
+            style={{
+              width: 24,
+              height: 24,
+            }}
+          />
+        </View>
+
+        <View
           style={{
-            color: Theme.colors.text,
-            fontSize: 18,
-            fontFamily: "Onest",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 16,
           }}
         >
-          Choose your mode
-        </Text>
-
-        <LottieView
-          source={ic}
-          autoPlay
-          loop={false}
-          duration={2000}
-          style={{
-            width: 24,
-            height: 24,
-          }}
-        />
-      </View>
-
-      <View
-        style={{
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 16,
-        }}
-      >
-        <Pressable
-          onPress={() => handlePress("offline")}
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? Theme.colors.background2
-                : Theme.colors.primary2,
-            },
-            styles.pressables,
-          ]}
-        >
-          <OfflineIcon size={32} color={Theme.colors.accent} />
-
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                color: Theme.colors.text,
-                fontSize: 20,
-                fontFamily: "OnestBold",
-              }}
-            >
-              Play offline
-            </Text>
-            <Text
-              style={{
-                color: Theme.colors.gray,
-                fontSize: 14,
-                fontFamily: "Onest",
-              }}
-            >
-              Play with friends in person!
-            </Text>
-          </View>
-
-          <ForwardIcon size={32} color={Theme.colors.accent} />
-        </Pressable>
-
-        <Pressable
-          onPress={() => handlePress("online")}
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? Theme.colors.background2
-                : Theme.colors.primary2,
-            },
-            styles.pressables,
-          ]}
-        >
-          <OnlineIcon size={32} color={Theme.colors.accent} />
-
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                color: Theme.colors.text,
-                fontSize: 20,
-                fontFamily: "OnestBold",
-              }}
-            >
-              Play online
-            </Text>
-            <Text
-              style={{
-                color: Theme.colors.gray,
-                fontSize: 14,
-                fontFamily: "Onest",
-              }}
-            >
-              Connect over the network
-            </Text>
-          </View>
-
-          <ForwardIcon size={32} color={Theme.colors.accent} />
-        </Pressable>
-
-        <Pressable
-          onPress={() => handlePress("join")}
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed
-                ? Theme.colors.background2
-                : Theme.colors.primary2,
-            },
-            styles.pressables,
-          ]}
-        >
-          <LinkIcon size={32} color={Theme.colors.accent} />
-
-          <View style={{ flex: 1, gap: 12 }}>
-            <Text
-              style={{
-                color: Theme.colors.text,
-                fontSize: 20,
-                fontFamily: "OnestBold",
-              }}
-            >
-              Join a game
-            </Text>
-
-            <TextInput
-              placeholder="Code"
-              placeholderTextColor={Theme.colors.darkGray}
-              keyboardType="numeric"
-              cursorColor={Theme.colors.accent}
-              style={{
-                backgroundColor: Theme.colors.background2,
-                borderRadius: 16,
-                padding: 12,
-                color: Theme.colors.text,
-                fontFamily: "Onest",
-              }}
-            />
-          </View>
-
-          <ForwardIcon size={32} color={Theme.colors.accent} />
-        </Pressable>
-      </View>
+          <ModesButton
+            icon={<OfflineIcon size={32} color={Theme.colors.accent} />}
+            title="Play offline"
+            subtitle="Play with friends in person!"
+            flag="offline"
+            onPress={() => handlePress("offline")}
+          />
+          <ModesButton
+            icon={<OnlineIcon size={32} color={Theme.colors.accent} />}
+            title="Play online"
+            subtitle="Connect over the network"
+            flag="online"
+            onPress={() => handlePress("online")}
+          />
+          <ModesButton
+            icon={<LinkIcon size={32} color={Theme.colors.accent} />}
+            title="Join a game"
+            flag="join"
+            onPress={() => handlePress("join")}
+          >
+            <FocusInput placeholder="Code" type="numeric" />
+          </ModesButton>
+        </View>
+      </Pressable>
     </Screen>
   )
 }
-
-const styles = StyleSheet.create({
-  pressables: {
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    borderRadius: 26,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 18,
-  },
-})

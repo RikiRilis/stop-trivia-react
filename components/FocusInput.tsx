@@ -1,12 +1,21 @@
 import React, { useState, useRef, useEffect } from "react"
-import { Animated, TextInput, StyleSheet } from "react-native"
+import {
+  Animated,
+  TextInput,
+  StyleSheet,
+  KeyboardTypeOptions,
+} from "react-native"
 import { Theme } from "@/libs/consts"
 
 interface FocusInputProps {
   placeholder: string
+  type?: KeyboardTypeOptions
 }
 
-export const FocusInput = ({ placeholder }: FocusInputProps) => {
+export const FocusInput = ({
+  type = "default",
+  placeholder,
+}: FocusInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const borderAnim = useRef(new Animated.Value(0)).current
 
@@ -41,7 +50,7 @@ export const FocusInput = ({ placeholder }: FocusInputProps) => {
       <TextInput
         placeholder={placeholder}
         placeholderTextColor={Theme.colors.darkGray}
-        keyboardType="default"
+        keyboardType={type}
         cursorColor={Theme.colors.accent}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
