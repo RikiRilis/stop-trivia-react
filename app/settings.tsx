@@ -1,11 +1,13 @@
 import { SettingsButton } from "@/components/SettingsButton"
 import {
   BackIcon,
+  CopyIcon,
   LanguageIcon,
   ListIcon,
   LogoutIcon,
   PrivacyIcon,
   SoundIcon,
+  UserIcon,
   VibrationIcon,
   WebIcon,
 } from "@/components/ui/Icons"
@@ -28,6 +30,8 @@ import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
 import { BottomSheetModal } from "@/components/BottomSheetModal"
 import BottomSheet from "@gorhom/bottom-sheet"
+import { signOut } from "firebase/auth"
+import { auth } from "@/libs/firebaseConfig"
 
 const languageCodes = ["en", "es"]
 
@@ -35,7 +39,13 @@ export default function Settings() {
   const [isVibrationEnabled, setIsVibrationEnabled] = useState(false)
   const [isSoundEnabled, setIsSoundEnabled] = useState(false)
   const [languageSelected, setLanguageSelected] = useState<string>("en")
-  const { setItem, getItem } = useStorage()
+  const [userName, setUserName] = useState<string | null | undefined>(
+    "Anon-12345678"
+  )
+  const [userId, setUserId] = useState<string | undefined>(
+    "1234567890101112131415"
+  )
+  const { setItem, getItem, removeItem } = useStorage()
 
   const sheetRef = useRef<BottomSheet>(null)
   const navigation = useNavigation()
@@ -49,6 +59,8 @@ export default function Settings() {
       setIsVibrationEnabled(parseBoolean(vibrationValue))
       setIsSoundEnabled(parseBoolean(soundValue))
       setLanguageSelected(languageCode ?? "en")
+      setUserId(auth.currentUser?.uid)
+      setUserName(auth.currentUser?.displayName)
     }
 
     loadSettings()
@@ -76,6 +88,15 @@ export default function Settings() {
     setItem("language", code)
   }
 
+  const copyUserId = () => {}
+
+  const handleSignOut = () => {
+    if (auth) {
+      removeItem("user")
+      signOut(auth)
+    }
+  }
+
   return (
     <View
       style={{
@@ -100,6 +121,62 @@ export default function Settings() {
       />
 
       <ScrollView style={{ flex: 1 }}>
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            paddingBottom: 22,
+          }}
+        >
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: Theme.colors.primary2,
+              padding: 12,
+              borderRadius: "100%",
+              marginBottom: 4,
+            }}
+          >
+            <UserIcon size={64} color={Theme.colors.accent} />
+          </View>
+
+          <Text
+            style={{
+              color: Theme.colors.accent,
+              fontFamily: "OnestBold",
+              fontSize: 24,
+            }}
+          >
+            {userName}
+          </Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 4,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: Theme.colors.darkGray,
+                fontFamily: "Onest",
+                fontSize: 12,
+              }}
+            >
+              {userId}
+            </Text>
+
+            <Pressable onPress={copyUserId}>
+              <CopyIcon color={Theme.colors.darkGray} size={12} />
+            </Pressable>
+          </View>
+        </View>
+
+        <Divider />
+
         <PlatformPressable
           style={{
             flexDirection: "row",
@@ -208,24 +285,12 @@ export default function Settings() {
 
         <Divider />
 
-        <PlatformPressable
-          style={{
-            flexDirection: "row",
-            gap: 12,
-            alignItems: "center",
-            padding: 16,
-            paddingVertical: 16,
-          }}
-          onPress={() => {}}
-        >
-          <View>
-            <LogoutIcon color={Theme.colors.red} />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: Theme.colors.red }}>Sign Out</Text>
-          </View>
-        </PlatformPressable>
+        <SettingsButton
+          onPress={handleSignOut}
+          title="Sign Out"
+          icon={<LogoutIcon color={Theme.colors.red} />}
+          color={Theme.colors.red}
+        />
       </ScrollView>
 
       <BottomSheetModal title="Language" ref={sheetRef}>
