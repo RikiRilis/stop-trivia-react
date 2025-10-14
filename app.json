@@ -14,7 +14,8 @@
       "backgroundColor": "#000B0A"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rilisentertainment.stoptriviaonline"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +23,8 @@
         "backgroundColor": "#000B0A"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.rilisentertainment.stoptriviaonline"
     },
     "web": {
       "favicon": "./assets/ic_brand.png"
@@ -35,7 +37,10 @@
         {
           "backgroundColor": "#000B0A"
         }
-      ]
+      ],
+      ["expo-build-properties", {
+        "ios": {"useFrameworks": "static"}
+      }]
     ]
   }
 }

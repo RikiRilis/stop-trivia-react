@@ -1,16 +1,30 @@
-import { CogIcon } from "@/components/ui/Icons"
-import { Theme } from "@/libs/consts"
+import React, { useEffect, useState } from "react"
+import { Image, Pressable, View } from "react-native"
 import { Link, Stack } from "expo-router"
-import { Image, Pressable } from "react-native"
-import { useFonts } from "expo-font"
-import React, { useState } from "react"
-import SplashScreen from "@/components/ui/SplashScreen"
-import { StatusBar } from "expo-status-bar"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { StatusBar } from "expo-status-bar"
+import { useFonts } from "expo-font"
+
+import { CogIcon } from "@/components/ui/Icons"
+import { Theme } from "@/libs/consts"
+import SplashScreen from "@/components/ui/SplashScreen"
+import { onAuthStateChanged, User } from "firebase/auth"
+import { auth } from "@/libs/firebaseConfig"
+import { LoginForm } from "@/components/LoginForm"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
+  const [initializing, setInitializing] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
+      if (initializing) setInitializing(false)
+    })
+    return unsubscribe
+  }, [])
 
   const [loaded] = useFonts({
     Onest: require("../assets/fonts/onest-latin-400-normal.ttf"),
@@ -30,36 +44,43 @@ export default function Layout() {
       style={{ height: "100%", backgroundColor: Theme.colors.background }}
     >
       <StatusBar style="auto" />
-
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack
-          screenOptions={{
-            animationMatchesGesture: true,
-            animation: "default",
-            animationDuration: 100,
-            contentStyle: { backgroundColor: Theme.colors.background },
-            headerStyle: { backgroundColor: Theme.colors.background },
-            headerTintColor: Theme.colors.text,
-            headerTitle: "Stop Trivia",
-            headerTitleStyle: {
-              fontSize: 24,
-              fontFamily: "OnestBold",
-            },
-            headerLeft: () => (
-              <Image
-                source={require("@/assets/ic_brand.png")}
-                style={{ width: 40, height: 40 }}
-              />
-            ),
-            headerRight: () => (
-              <Link asChild href="/settings">
-                <Pressable>
-                  <CogIcon />
-                </Pressable>
-              </Link>
-            ),
-          }}
-        />
+        {user ? (
+          <Stack
+            screenOptions={{
+              animationMatchesGesture: true,
+              animation: "default",
+              animationDuration: 100,
+              contentStyle: { backgroundColor: Theme.colors.background },
+              headerStyle: { backgroundColor: Theme.colors.background },
+              headerTintColor: Theme.colors.text,
+              headerTitle: "Stop Trivia",
+              headerTitleStyle: {
+                fontSize: 24,
+                fontFamily: "OnestBold",
+              },
+              headerLeft: () => (
+                <Image
+                  source={require("@/assets/ic_brand.png")}
+                  style={{ width: 40, height: 40 }}
+                />
+              ),
+              headerRight: () => (
+                <Link asChild href="/settings">
+                  <Pressable>
+                    <CogIcon />
+                  </Pressable>
+                </Link>
+              ),
+            }}
+          />
+        ) : (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <LoginForm />
+          </View>
+        )}
       </GestureHandlerRootView>
     </SafeAreaProvider>
   )
