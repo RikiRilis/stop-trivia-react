@@ -1,6 +1,6 @@
 import { ReactElement } from "react"
 import { StyleSheet, Text, View, Pressable } from "react-native"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 
 interface SettingsButtonProps {
   onPress: () => void

@@ -1,6 +1,6 @@
 import { View, StyleSheet, LayoutChangeEvent, Vibration } from "react-native"
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import { TabBarButton } from "../TabBarButton"
 import { useCallback, useState } from "react"
 import Animated, {

@@ -1,4 +1,4 @@
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import { Pressable, View, Text, StyleSheet } from "react-native"
 import { ForwardIcon } from "@/components/ui/Icons"
 import React, { ReactElement } from "react"
@@ -6,6 +6,7 @@ import React, { ReactElement } from "react"
 interface Props {
   children?: React.ReactNode
   icon: ReactElement
+  rightIcon?: ReactElement | undefined
   title: string
   subtitle?: string
   flag: string
@@ -15,6 +16,7 @@ interface Props {
 export const ModesButton = ({
   children,
   icon,
+  rightIcon,
   title,
   subtitle,
   flag,
@@ -59,7 +61,11 @@ export const ModesButton = ({
         {children}
       </View>
 
-      <ForwardIcon size={32} color={Theme.colors.accent} />
+      {rightIcon ? (
+        rightIcon
+      ) : (
+        <ForwardIcon size={32} color={Theme.colors.accent} />
+      )}
     </Pressable>
   )
 }

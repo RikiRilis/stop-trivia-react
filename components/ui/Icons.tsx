@@ -7,7 +7,11 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 import AntDesign from "@expo/vector-icons/AntDesign"
 import Octicons from "@expo/vector-icons/Octicons"
 import Feather from "@expo/vector-icons/Feather"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
+
+export const GoogleIcon = (props: any) => (
+  <AntDesign name="google" color={Theme.colors.text} size={24} {...props} />
+)
 
 export const RestartIcon = (props: any) => (
   <MaterialCommunityIcons

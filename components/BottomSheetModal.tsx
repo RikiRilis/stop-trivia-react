@@ -4,7 +4,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet"
 import { Pressable, ScrollView, Text, View } from "react-native"
 import { Divider } from "@/components/Divider"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import React, { forwardRef, useCallback, useMemo } from "react"
 import { CloseIcon } from "./ui/Icons"
 

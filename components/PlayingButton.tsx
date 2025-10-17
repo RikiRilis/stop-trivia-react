@@ -1,4 +1,4 @@
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import { ReactElement } from "react"
 import { Pressable, StyleSheet } from "react-native"
 

@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router"
 import { HomeIcon, StatsIcon } from "@/components/ui/Icons"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import { TabBar } from "@/components/ui/TabBar"
 
 export default function TabsLayout() {

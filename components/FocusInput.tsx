@@ -5,16 +5,20 @@ import {
   StyleSheet,
   KeyboardTypeOptions,
 } from "react-native"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 
 interface FocusInputProps {
   placeholder: string
   type?: KeyboardTypeOptions
+  onChange?: (text: string) => void
+  capitalize?: "none" | "sentences" | "words" | "characters"
 }
 
 export const FocusInput = ({
   type = "default",
   placeholder,
+  onChange,
+  capitalize,
 }: FocusInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const borderAnim = useRef(new Animated.Value(0)).current
@@ -55,6 +59,8 @@ export const FocusInput = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         style={styles.input}
+        onChangeText={onChange}
+        autoCapitalize={capitalize}
       />
     </Animated.View>
   )

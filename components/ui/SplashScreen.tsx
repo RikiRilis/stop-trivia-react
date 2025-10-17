@@ -1,7 +1,7 @@
 import LottieView from "lottie-react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ic from "@/assets/lotties/ic_brand.json"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 
 export default function SplashScreen({
   onFinish = (isCancelled) => {},
