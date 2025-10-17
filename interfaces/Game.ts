@@ -9,13 +9,13 @@ export interface GameModel {
   players: number
   playersReady: number
   playersNames: Player[]
+  host: string
+  timestamp: number
 }
 
 export enum GameStatus {
   CREATED,
-  JOINED,
-  STARTING,
   IN_PROGRESS,
-  FINISHED,
+  STOPPED,
   DELETED,
 }

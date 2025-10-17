@@ -1,6 +1,5 @@
 export interface Player {
-  name: string
+  id?: string | null
+  name?: string | null
   points: number
-  score: number
-  best: string
 }
