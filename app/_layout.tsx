@@ -7,23 +7,28 @@ import { StatusBar } from "expo-status-bar"
 import { useFonts } from "expo-font"
 
 import { CogIcon } from "@/components/ui/Icons"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import SplashScreen from "@/components/ui/SplashScreen"
-import { onAuthStateChanged, User } from "firebase/auth"
 import { auth } from "@/libs/firebaseConfig"
 import { LoginForm } from "@/components/LoginForm"
+import {
+  FirebaseAuthTypes,
+  onAuthStateChanged,
+} from "@react-native-firebase/auth"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
   const [initializing, setInitializing] = useState(true)
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null)
+
+  const handleAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
+    setUser(user)
+    if (initializing) setInitializing(false)
+  }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser)
-      if (initializing) setInitializing(false)
-    })
-    return unsubscribe
+    const subscriber = onAuthStateChanged(auth, handleAuthStateChanged)
+    return subscriber
   }, [])
 
   const [loaded] = useFonts({

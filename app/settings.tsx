@@ -11,7 +11,7 @@ import {
   VibrationIcon,
   WebIcon,
 } from "@/components/ui/Icons"
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import { PlatformPressable } from "@react-navigation/elements"
 import { Stack, useNavigation } from "expo-router"
 import { useEffect, useRef, useState } from "react"
@@ -30,7 +30,8 @@ import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
 import { BottomSheetModal } from "@/components/BottomSheetModal"
 import BottomSheet from "@gorhom/bottom-sheet"
-import { signOut } from "firebase/auth"
+import Clipboard from "@react-native-clipboard/clipboard"
+import { signOut } from "@react-native-firebase/auth"
 import { auth } from "@/libs/firebaseConfig"
 
 const languageCodes = ["en", "es"]
@@ -88,7 +89,10 @@ export default function Settings() {
     setItem("language", code)
   }
 
-  const copyUserId = () => {}
+  const copyUserId = () => {
+    Vibration.vibrate(10)
+    Clipboard.setString(userId ?? "")
+  }
 
   const handleSignOut = () => {
     if (auth) {
@@ -285,12 +289,14 @@ export default function Settings() {
 
         <Divider />
 
-        <SettingsButton
-          onPress={handleSignOut}
-          title="Sign Out"
-          icon={<LogoutIcon color={Theme.colors.red} />}
-          color={Theme.colors.red}
-        />
+        {auth && (
+          <SettingsButton
+            onPress={handleSignOut}
+            title="Sign Out"
+            icon={<LogoutIcon color={Theme.colors.red} />}
+            color={Theme.colors.red}
+          />
+        )}
       </ScrollView>
 
       <BottomSheetModal title="Language" ref={sheetRef}>

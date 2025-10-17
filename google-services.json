@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "744895848346",
+    "firebase_url": "https://stop-trivia-online-default-rtdb.firebaseio.com",
+    "project_id": "stop-trivia-online",
+    "storage_bucket": "stop-trivia-online.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:744895848346:android:9f926de8cc88aa35e9a423",
+        "android_client_info": {
+          "package_name": "com.rilisentertainment.stoptriviaonline"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "744895848346-5rejvdctm2ges5eh8hpb8qq2p4drce5i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rilisentertainment.stoptriviaonline",
+            "certificate_hash": "c3a3bf7af1ba919ce4df2b12dc454754c2fb25c8"
+          }
+        },
+        {
+          "client_id": "744895848346-eb3lub10cuukogs7mqvt2tkpi6l07kla.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rilisentertainment.stoptriviaonline",
+            "certificate_hash": "f72b107ade22a7965dd4263c5db482d4413732c6"
+          }
+        },
+        {
+          "client_id": "744895848346-ka5qsgaqlrbnqtj8o88buftmqigdoip0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT8D6DwAHNGr_4Oz50NUWlMoYzcXb4RXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "744895848346-bbi360n5tifg9ai2tkv62fsuq90l44dt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "744895848346-niao9b9sno1g3q5vnu23sejoqsu09etl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rilisentertainment.stoptriviaonline"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

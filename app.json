@@ -9,13 +9,14 @@
     "newArchEnabled": true,
     "scheme": "stoptrivia",
     "splash": {
-      "image": "./assets/ic_brand.png",
       "resizeMode": "contain",
       "backgroundColor": "#000B0A"
     },
+    "platforms": ["android", "ios", "web"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rilisentertainment.stoptriviaonline"
+      "bundleIdentifier": "com.rilisentertainment.stoptriviaonline",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,12 +25,14 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.rilisentertainment.stoptriviaonline"
+      "package": "com.rilisentertainment.stoptriviaonline",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/ic_brand.png"
     },
     "plugins": [
+      "@react-native-firebase/app",
       "expo-router",
       "expo-font",
       [
@@ -38,9 +41,20 @@
           "backgroundColor": "#000B0A"
         }
       ],
-      ["expo-build-properties", {
-        "ios": {"useFrameworks": "static"}
-      }]
-    ]
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "efcde181-f82b-437a-910b-94b2e117ac25"
+      }
+    }
   }
 }

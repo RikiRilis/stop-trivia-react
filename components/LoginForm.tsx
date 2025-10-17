@@ -1,5 +1,5 @@
 // components/LoginForm.tsx
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   View,
   Text,
@@ -12,11 +12,19 @@ import {
   AccessibilityInfo,
   Keyboard,
   ToastAndroid,
+  Vibration,
+  Linking,
 } from "react-native"
-import { Theme } from "@/libs/consts"
+import {
+  GOOGLE_AUTH_ANDROID_CLIENT_ID,
+  GOOGLE_AUTH_IOS_CLIENT_ID,
+  GOOGLE_AUTH_WEB_CLIENT_ID,
+} from "@/constants/GoogleAuth"
+import { Theme } from "@/constants/Theme"
 import {
   EyeIcon,
   EyeOffIcon,
+  GoogleIcon,
   LockIcon,
   MailIcon,
   UserIcon,
@@ -25,11 +33,14 @@ import ic from "@/assets/lotties/ic_brand.json"
 import LottieView from "lottie-react-native"
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   sendEmailVerification,
   sendPasswordResetEmail,
+  signInWithCredential,
   signInWithEmailAndPassword,
   updateProfile,
-} from "firebase/auth"
+} from "@react-native-firebase/auth"
+import * as Google from "expo-auth-session/providers/google"
 import { auth } from "@/libs/firebaseConfig"
 
 export const LoginForm = () => {
@@ -43,16 +54,57 @@ export const LoginForm = () => {
   const [btnScale] = useState(new Animated.Value(1))
   const [signInForm, setSignInForm] = useState(true)
 
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: GOOGLE_AUTH_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_AUTH_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_AUTH_ANDROID_CLIENT_ID,
+  })
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { id_token } = response.params
+      const credential = GoogleAuthProvider.credential(id_token)
+      signInWithCredential(auth, credential)
+    }
+  }, [response])
+
+  const handleGoogleSignIn = () => {
+    promptAsync()
+  }
+
   const validate = () => {
     setError(null)
-    if (!email.trim()) return setError("Email is required")
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!re.test(email.trim())) return setError("Enter a valid email")
-    if (password.length < 6)
-      return setError("Password must be at least 6 characters")
+
+    if (email.trim() === "" || password.trim() === "") {
+      Vibration.vibrate(100)
+      return setError("Please enter the credentials.")
+    }
+
     if (!signInForm) {
-      if (password !== repeatPassword)
+      if (password !== repeatPassword && password.length >= 6) {
+        Vibration.vibrate(100)
         return setError("Passwords must be equals")
+      }
+
+      if (displayName.trim().length < 3) {
+        Vibration.vibrate(100)
+        return setError("Username must be at least 3 characters")
+      }
+
+      if (displayName.trim().length > 20) {
+        Vibration.vibrate(100)
+        return setError("Username must be less than 20 characters")
+      }
+
+      if (displayName.trim().includes(" ")) {
+        Vibration.vibrate(100)
+        return setError("Username must not contain spaces")
+      }
+
+      if (displayName.trim() === "") {
+        Vibration.vibrate(100)
+        return setError("Please enter the username")
+      }
     }
     return null
   }
@@ -87,6 +139,7 @@ export const LoginForm = () => {
 
     const err = validate()
     if (err) {
+      console.log(err)
       setLoading(false)
       setError(err)
       AccessibilityInfo.announceForAccessibility(err)
@@ -98,42 +151,53 @@ export const LoginForm = () => {
         await signInWithEmailAndPassword(auth, email, password)
         console.log("Signed in!")
       } else {
-        await createUserWithEmailAndPassword(auth, email, password).then(
-          (res) => {
-            updateProfile(res.user, {
-              displayName: displayName.trim(),
-            })
-            sendEmailVerification(res.user)
-            ToastAndroid.showWithGravity(
-              "Verify email sent to your inbox!",
-              ToastAndroid.SHORT,
-              ToastAndroid.CENTER
-            )
-          }
-        )
-        console.log("Signed up!")
+        if (password === repeatPassword) {
+          await createUserWithEmailAndPassword(auth, email, password).then(
+            (res) => {
+              updateProfile(res.user, {
+                displayName: displayName.trim(),
+              })
+              sendEmailVerification(res.user)
+              ToastAndroid.showWithGravity(
+                "Verify email sent to your inbox!",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+              )
+            }
+          )
+          console.log("Signed up!")
+        }
       }
     } catch (e: any) {
-      let message = "Something went wrong. Please try again."
-
+      let message: string = "Please enter the credentials."
       switch (e.code) {
         case "auth/email-already-in-use":
+          Vibration.vibrate(100)
           message = "This email is already in use. Please, sign in."
           break
-        case "auth/invalid-email":
-          message = "Please enter a valid email."
-          break
         case "auth/user-not-found":
+          Vibration.vibrate(100)
           message = "No user found with this email."
           break
         case "auth/wrong-password":
+          Vibration.vibrate(100)
           message = "Incorrect password."
           break
+        case "auth/too-many-requests":
+          Vibration.vibrate(100)
+          message = "Too many attempts. Try again later."
+          break
+        case "auth/invalid-email":
+          Vibration.vibrate(100)
+          message = "Invalid email address."
+          break
         case "auth/weak-password":
+          Vibration.vibrate(100)
           message = "Password must be at least 6 characters."
           break
-        case "auth/too-many-requests":
-          message = "Too many attempts. Try again later."
+        case "auth/invalid-credential":
+          Vibration.vibrate(100)
+          message = "Invalid email or password."
           break
       }
 
@@ -333,6 +397,46 @@ export const LoginForm = () => {
               </Text>
             </Pressable>
           </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 4,
+              alignSelf: "stretch",
+            }}
+          >
+            <Text
+              onPress={() => Linking.openURL("https://rikirilis.com/privacy")}
+              style={styles.footerPolicy}
+            >
+              Privacy Policy
+            </Text>
+          </View>
+
+          {/* <View>
+            <Text
+              style={{
+                textAlign: "center",
+                color: Theme.colors.gray,
+                marginVertical: 24,
+              }}
+            >
+              or Sign in with
+            </Text>
+
+            <Pressable
+              onPress={handleGoogleSignIn}
+              style={({ pressed }) => [
+                styles.submit,
+                pressed && { opacity: 0.9 },
+                loading && { opacity: 0.8 },
+              ]}
+            >
+              <GoogleIcon size={24} />
+              <Text style={styles.googleText}>Google</Text>
+            </Pressable>
+          </View> */}
         </View>
       </Pressable>
     </KeyboardAvoidingView>
@@ -405,6 +509,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 6,
     marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
   },
   submitText: {
     color: Theme.colors.text,
@@ -455,8 +562,28 @@ const styles = StyleSheet.create({
     color: Theme.colors.gray,
     fontFamily: "Onest",
   },
+  footerPolicy: {
+    color: Theme.colors.darkGray,
+    fontFamily: "Onest",
+    marginVertical: 8,
+  },
   signupText: {
     color: Theme.colors.primary,
+    fontFamily: "OnestBold",
+  },
+  googleBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Theme.colors.accent,
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginBottom: 12,
+    gap: 8,
+  },
+  googleText: {
+    color: Theme.colors.text,
+    fontSize: 16,
     fontFamily: "OnestBold",
   },
 })
