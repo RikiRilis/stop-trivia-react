@@ -1,6 +1,13 @@
-import { Theme } from "@/libs/consts"
+import { Theme } from "@/constants/Theme"
 import React, { useCallback, useState } from "react"
-import { View, Text, Vibration, Pressable, Keyboard } from "react-native"
+import {
+  View,
+  Text,
+  Vibration,
+  Pressable,
+  Keyboard,
+  ActivityIndicator,
+} from "react-native"
 import { LinkIcon, OfflineIcon, OnlineIcon } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
 import { useFocusEffect, useRouter } from "expo-router"
@@ -10,10 +17,16 @@ import LottieView from "lottie-react-native"
 import ic from "@/assets/lotties/ic_gamepad.json"
 import { ModesButton } from "@/components/ModesButton"
 import { FocusInput } from "@/components/FocusInput"
+import Fire from "@/db/Fire"
+import { GameStatus } from "@/interfaces/Game"
 
 export default function Index() {
-  const navigation = useRouter()
   const [vibrationEnabled, setVibrationEnabled] = useState(true)
+  const [id, setId] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const { navigate } = useRouter()
   const { getItem } = useStorage()
 
   useFocusEffect(
@@ -26,12 +39,64 @@ export default function Index() {
     }, [])
   )
 
+  const handleCodeChange = (text: string) => {
+    setId(text.trim().toLocaleLowerCase())
+  }
+
   const handlePress = (flag: string) => {
-    if (vibrationEnabled) {
-      Vibration.vibrate(10)
+    if (loading) return
+
+    vibrationEnabled && Vibration.vibrate(10)
+    setError(null)
+
+    if (flag === "join") {
+      setLoading(true)
+
+      if (id.length !== 6) {
+        vibrationEnabled && Vibration.vibrate(100)
+        setError("Please enter a valid code")
+        setLoading(false)
+        return
+      }
+
+      id.length === 6 &&
+        Fire.getGame("stop", id).then((game) => {
+          if (!game) {
+            vibrationEnabled && Vibration.vibrate(100)
+            setError("No game found with this code")
+            setLoading(false)
+            return
+          }
+
+          if (game) {
+            if (game.gameStatus !== GameStatus.CREATED) {
+              vibrationEnabled && Vibration.vibrate(100)
+              setError("This game has already started")
+              setLoading(false)
+              return
+            }
+
+            if (game.gameStatus === GameStatus.CREATED) {
+              setLoading(false)
+              setError(null)
+
+              navigate({
+                pathname: "stop",
+                params: { mode: flag, id },
+              })
+
+              return
+            }
+          }
+        })
     }
 
-    navigation.navigate("playing")
+    if (flag !== "join") {
+      navigate({
+        pathname: "stop",
+        params: { mode: flag, id },
+      })
+    }
   }
 
   return (
@@ -83,11 +148,36 @@ export default function Index() {
           />
           <ModesButton
             icon={<LinkIcon size={32} color={Theme.colors.accent} />}
+            rightIcon={
+              loading ? (
+                <ActivityIndicator
+                  color={Theme.colors.accent}
+                  style={{ width: 32, height: 32 }}
+                ></ActivityIndicator>
+              ) : undefined
+            }
             title="Join a game"
             flag="join"
             onPress={() => handlePress("join")}
           >
-            <FocusInput placeholder="Code" type="numeric" />
+            <FocusInput
+              capitalize="none"
+              onChange={handleCodeChange}
+              placeholder="Code"
+              type="default"
+            />
+
+            {error && (
+              <Text
+                style={{
+                  color: Theme.colors.red,
+                  fontFamily: "Onest",
+                  fontSize: 14,
+                }}
+              >
+                {error}
+              </Text>
+            )}
           </ModesButton>
         </View>
       </Pressable>
