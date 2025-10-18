@@ -22,6 +22,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  ToastAndroid,
   Vibration,
   View,
 } from "react-native"
@@ -90,8 +91,13 @@ export default function Settings() {
   }
 
   const copyUserId = () => {
-    Vibration.vibrate(10)
+    isVibrationEnabled && Vibration.vibrate(10)
     Clipboard.setString(userId ?? "")
+    ToastAndroid.showWithGravity(
+      "Copied to clipboard",
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    )
   }
 
   const handleSignOut = () => {
