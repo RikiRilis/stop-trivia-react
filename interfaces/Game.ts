@@ -6,10 +6,10 @@ export interface GameModel {
   currentLetter: string
   currentTime: number
   gameStatus: GameStatus
-  players: number
   playersReady: number
-  playersNames: Player[]
+  players: Player[]
   host: string
+  startTime: number
   timestamp: number
 }
 
@@ -17,5 +17,4 @@ export enum GameStatus {
   CREATED,
   IN_PROGRESS,
   STOPPED,
-  DELETED,
 }

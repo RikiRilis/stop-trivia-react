@@ -20,9 +20,8 @@ class Fire {
       currentLetter: "-",
       currentTime: 120,
       gameStatus: GameStatus.CREATED,
-      players: 1,
       playersReady: 1,
-      playersNames: [{ id: "", name: "", points: 0 }] as Player[],
+      players: [{ id: "", name: "", points: 0 }] as Player[],
       host: "no-host",
       timestamp: Date.now(),
     } as GameModel,
@@ -64,7 +63,11 @@ class Fire {
     return unsubscribe
   }
 
-  updateGame = async (collectionName: string, gameId: string, data: any) => {
+  updateGame = async (
+    collectionName: string,
+    gameId: string,
+    data: GameModel | any
+  ) => {
     const gameRef = doc(db, collectionName, gameId)
     await updateDoc(gameRef, data)
   }
