@@ -43,7 +43,7 @@ export default function Index() {
     setId(text.trim().toLocaleLowerCase())
   }
 
-  const handlePress = (flag: string) => {
+  const handlePress = (flag: string, time: number = 300) => {
     if (loading) return
 
     vibrationEnabled && Vibration.vibrate(10)
@@ -68,25 +68,28 @@ export default function Index() {
             return
           }
 
+          if (game.players.length >= 4) {
+            vibrationEnabled && Vibration.vibrate(100)
+            setError("This game is full")
+            setLoading(false)
+            return
+          }
+
           if (game) {
-            if (game.gameStatus !== GameStatus.CREATED) {
+            if (game.gameStatus === GameStatus.IN_PROGRESS) {
               vibrationEnabled && Vibration.vibrate(100)
               setError("This game has already started")
               setLoading(false)
               return
             }
 
-            if (game.gameStatus === GameStatus.CREATED) {
-              setLoading(false)
-              setError(null)
+            setLoading(false)
+            setError(null)
 
-              navigate({
-                pathname: "stop",
-                params: { mode: flag, id },
-              })
-
-              return
-            }
+            navigate({
+              pathname: "stop",
+              params: { mode: flag, id: game.gameId, time: game.currentTime },
+            })
           }
         })
     }
@@ -94,7 +97,7 @@ export default function Index() {
     if (flag !== "join") {
       navigate({
         pathname: "stop",
-        params: { mode: flag, id },
+        params: { mode: flag, id, time },
       })
     }
   }
