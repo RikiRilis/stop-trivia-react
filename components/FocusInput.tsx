@@ -12,6 +12,8 @@ interface FocusInputProps {
   type?: KeyboardTypeOptions
   onChange?: (text: string) => void
   capitalize?: "none" | "sentences" | "words" | "characters"
+  value?: string
+  editable?: boolean
 }
 
 export const FocusInput = ({
@@ -19,6 +21,8 @@ export const FocusInput = ({
   placeholder,
   onChange,
   capitalize,
+  value,
+  editable = true,
 }: FocusInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const borderAnim = useRef(new Animated.Value(0)).current
@@ -58,9 +62,11 @@ export const FocusInput = ({
         cursorColor={Theme.colors.accent}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        style={styles.input}
         onChangeText={onChange}
         autoCapitalize={capitalize}
+        value={value}
+        editable={editable}
+        style={[styles.input, !editable && { color: Theme.colors.gray }]}
       />
     </Animated.View>
   )
