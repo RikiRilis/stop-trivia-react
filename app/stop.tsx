@@ -38,7 +38,7 @@ import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
 
 export default function Stop() {
-  const [gameData, setGameData] = useState<GameModel | null>()
+  const [gameData, setGameData] = useState<GameModel | null>(null)
   const [points, setPoints] = useState<number>(0)
   const [title, setTitle] = useState<string | null>(null)
   const [countdown, setCountdown] = useState<number | string>(3)
@@ -47,6 +47,7 @@ export default function Stop() {
   const [vibrationEnabled, setVibrationEnabled] = useState<boolean>()
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [ready, setReady] = useState<boolean>(false)
+  const [isStarting, setIsStarting] = useState(false)
   const [inputs, setInputs] = useState({
     name: "",
     country: "",
@@ -136,7 +137,19 @@ export default function Stop() {
     }
 
     unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
-      if (!data) return
+      if (!data) {
+        if (mode === "join") {
+          ToastAndroid.showWithGravity(
+            "The host closed the game",
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER
+          )
+          navigation.goBack()
+          if (timerRef.current) clearInterval(timerRef.current)
+        }
+        return
+      }
+
       currentGameData = data
       setGameData(currentGameData)
       setTitleByGameStatus(currentGameData.gameStatus)
@@ -153,6 +166,7 @@ export default function Stop() {
       if (currentGameData.gameStatus === GameStatus.STOPPED) {
         countdownStarted.current = false
         setCountdown(3)
+        stopTimer()
       }
 
       const backPress = (): boolean => {
@@ -163,11 +177,20 @@ export default function Stop() {
     })
 
     return () => {
+      console.log("Cleaning up...")
+
+      if (unsubscribe) {
+        unsubscribe()
+        unsubscribe = undefined
+      }
+
+      if (backHandler) backHandler.remove()
+
       if (mode === "online" && gameId) {
         Fire.deleteGame("stop", gameId)
       }
 
-      if (mode === "join" && gameId) {
+      if (mode === "join" && gameId && currentGameData) {
         Fire.updateGame("stop", gameId, {
           players: currentGameData
             ? currentGameData.players.filter(
@@ -178,11 +201,8 @@ export default function Stop() {
             currentGameData && currentGameData.playersReady > 1
               ? currentGameData.players.length - 1
               : 1,
-        })
+        }).catch(() => null)
       }
-
-      if (unsubscribe) unsubscribe()
-      backHandler.remove()
     }
   }, [])
 
@@ -275,9 +295,12 @@ export default function Stop() {
   }
 
   const handleCountdownSync = (data: GameModel) => {
-    vibrationEnabled && Vibration.vibrate(30)
-    setCountdown(3)
     let counter = 3
+
+    vibrationEnabled && Vibration.vibrate(30)
+    stopTimer()
+    setCountdown(3)
+    setIsStarting(true)
 
     timerRef.current = setInterval(() => {
       vibrationEnabled && Vibration.vibrate(30)
@@ -287,7 +310,8 @@ export default function Stop() {
         stopTimer()
         setCountdown(data.currentLetter)
         setLetter(data.currentLetter)
-        initGame(data)
+        handleTimer(data)
+        setIsStarting(false)
       }
     }, 1000)
   }
@@ -319,10 +343,6 @@ export default function Stop() {
     }
   }
 
-  const initGame = (data: GameModel) => {
-    handleTimer(data)
-  }
-
   const handleSumPoints = (toAdd: number) => {
     if (!gameData) return
     const userId = getAuth().currentUser?.uid
@@ -345,14 +365,15 @@ export default function Stop() {
     })
   }
 
-  const handleBackPress = (data: GameModel): boolean => {
-    if (!data) return true
-    if (data.gameStatus === GameStatus.IN_PROGRESS) {
+  const handleBackPress = (data?: GameModel | null): boolean => {
+    const currentData = data ?? gameData
+    if (!currentData) return true
+    if (currentData.gameStatus === GameStatus.IN_PROGRESS) {
       vibrationEnabled && Vibration.vibrate(100)
       return true
     }
 
-    if (data.players.length === 1) {
+    if (currentData.players.length <= 1) {
       handleOnExit()
       return true
     }
@@ -378,7 +399,9 @@ export default function Stop() {
             fontFamily: "OnestBold",
           },
           headerTitleAlign: "center",
-          headerLeft: () => <BackIcon size={34} onPress={handleBackPress} />,
+          headerLeft: () => (
+            <BackIcon size={34} onPress={() => handleBackPress(gameData)} />
+          ),
           headerRight: () => (
             <CurrentPlayers players={gameData?.players.length} />
           ),
@@ -483,31 +506,41 @@ export default function Stop() {
           <View style={{ flex: 1, flexDirection: "row", gap: 18 }}>
             <View style={styles.columns}>
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, name: text })}
                 value={inputs.name}
                 placeholder="Name"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, country: text })}
                 value={inputs.country}
                 placeholder="Country"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, animal: text })}
                 value={inputs.animal}
                 placeholder="Animal"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, food: text })}
                 value={inputs.food}
                 placeholder="Food"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, object: text })}
                 value={inputs.object}
                 placeholder="Object"
@@ -516,31 +549,41 @@ export default function Stop() {
 
             <View style={styles.columns}>
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, lastName: text })}
                 value={inputs.lastName}
                 placeholder="Last Name"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, color: text })}
                 value={inputs.color}
                 placeholder="Color"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, artist: text })}
                 value={inputs.artist}
                 placeholder="Artist"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, fruit: text })}
                 value={inputs.fruit}
                 placeholder="Fruit"
               />
               <FocusInput
-                editable={gameData?.gameStatus === GameStatus.IN_PROGRESS}
+                editable={
+                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                }
                 onChange={(text) => setInputs({ ...inputs, profession: text })}
                 value={inputs.profession}
                 placeholder="Profession"
