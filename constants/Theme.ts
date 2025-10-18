@@ -16,5 +16,6 @@ export const Theme = {
     border: "#333333",
     modal: "#002523ff",
     transparent: "#00000000",
+    backdrop: "#00000086",
   },
 }
