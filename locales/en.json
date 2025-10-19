@@ -1,4 +1,6 @@
 {
+  "restart_inputs": "Restart inputs",
+  "restart_inputs_desc": "This will restart all the inputs and the values entered. Your points will stay. Do you want to continue?",
   "players": "Players",
   "choose_your_mode": "Choose your mode",
   "play_offline": "Play offline",
