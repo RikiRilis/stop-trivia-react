@@ -8,7 +8,6 @@ import {
   View,
   Image,
   ToastAndroid,
-  Modal,
   BackHandler,
   NativeEventSubscription,
 } from "react-native"
@@ -21,6 +20,7 @@ import {
 import {
   BackIcon,
   CheckIcon,
+  CopyIcon,
   PlayIcon,
   RestartIcon,
   UsersIcon,
@@ -39,6 +39,8 @@ import { parseBoolean } from "@/libs/parseBoolean"
 import { useTranslation } from "react-i18next"
 import { BottomSheetModal } from "@/components/BottomSheetModal"
 import BottomSheet from "@gorhom/bottom-sheet"
+import { CustomModal } from "@/components/CustomModal"
+import Clipboard from "@react-native-clipboard/clipboard"
 
 export default function Stop() {
   const [gameData, setGameData] = useState<GameModel | null>(null)
@@ -48,7 +50,8 @@ export default function Stop() {
   const [timeLeft, setTimeLeft] = useState<number>(300)
   const [letter, setLetter] = useState<string>("-")
   const [vibrationEnabled, setVibrationEnabled] = useState<boolean>()
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [closeModalVisible, setCloseModalVisible] = useState<boolean>(false)
+  const [restartModalVisible, setRestartModalVisible] = useState<boolean>(false)
   const [ready, setReady] = useState<boolean>(false)
   const [isStarting, setIsStarting] = useState(false)
   const [inputs, setInputs] = useState({
@@ -101,7 +104,7 @@ export default function Stop() {
       gameId = sixDigit()
       Fire.setGame("stop", gameId, {
         gameId,
-        round: 1,
+        round: 0,
         currentLetter: "-",
         currentTime: gameTime,
         gameStatus: GameStatus.CREATED,
@@ -141,7 +144,15 @@ export default function Stop() {
       })
     }
 
-    if (mode === "offline") return
+    if (mode === "offline") {
+      const backPress = (): boolean => {
+        return handleBackPress(currentGameData)
+      }
+
+      backHandler = BackHandler.addEventListener("hardwareBackPress", backPress)
+
+      return
+    }
 
     unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
       if (!data) {
@@ -286,18 +297,7 @@ export default function Stop() {
     }
 
     if (flag === "restart") {
-      setInputs({
-        name: "",
-        country: "",
-        animal: "",
-        food: "",
-        object: "",
-        lastName: "",
-        color: "",
-        artist: "",
-        fruit: "",
-        profession: "",
-      })
+      setRestartModalVisible(true)
     }
   }
 
@@ -308,6 +308,11 @@ export default function Stop() {
     stopTimer()
     setCountdown(3)
     setIsStarting(true)
+    handleRestartInputs()
+
+    Fire.updateGame("stop", data.gameId, {
+      round: data.round + 1,
+    })
 
     timerRef.current = setInterval(() => {
       vibrationEnabled && Vibration.vibrate(30)
@@ -324,7 +329,7 @@ export default function Stop() {
   }
 
   const handleTimer = (data: GameModel) => {
-    let time = data.currentTime
+    let time = data.currentTime + 3
     const elapsed = Math.floor((Date.now() - data.startTime) / 1000)
 
     timerRef.current = setInterval(() => {
@@ -351,6 +356,10 @@ export default function Stop() {
   }
 
   const handleSumPoints = (toAdd: number) => {
+    if (mode === "offline") {
+      setPoints(points + toAdd)
+    }
+
     if (!gameData) return
     const userId = getAuth().currentUser?.uid
     if (!userId) return
@@ -387,13 +396,39 @@ export default function Stop() {
       return true
     }
 
-    mode === "online" && setModalVisible(true)
+    mode === "online" && setCloseModalVisible(true)
     mode === "join" && handleOnExit()
     return true
   }
 
+  const handleRestartInputs = () => {
+    setRestartModalVisible(false)
+    setInputs({
+      name: "",
+      country: "",
+      animal: "",
+      food: "",
+      object: "",
+      lastName: "",
+      color: "",
+      artist: "",
+      fruit: "",
+      profession: "",
+    })
+  }
+
+  const copyRoomCode = () => {
+    vibrationEnabled && Vibration.vibrate(10)
+    Clipboard.setString(gameData?.gameId ?? "")
+    ToastAndroid.showWithGravity(
+      t("copied_clipboard"),
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER
+    )
+  }
+
   const handleOnExit = () => {
-    setModalVisible(false)
+    setCloseModalVisible(false)
     navigation.goBack()
   }
 
@@ -420,75 +455,25 @@ export default function Stop() {
         }}
       />
 
-      <Modal
-        animationType="fade"
-        transparent={false}
-        visible={modalVisible}
+      <CustomModal
+        title={t("restart_inputs")}
+        description={t("restart_inputs_desc")}
+        modalVisible={restartModalVisible}
         onRequestClose={() => {
-          setModalVisible(!modalVisible)
+          setRestartModalVisible(!restartModalVisible)
         }}
-        backdropColor={Theme.colors.backdrop}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View>
-              <Text
-                style={{
-                  color: Theme.colors.accent,
-                  fontFamily: "OnestBold",
-                  fontSize: 18,
-                }}
-              >
-                {t("close_room")}
-              </Text>
-            </View>
+        onAccept={handleRestartInputs}
+      />
 
-            <View style={{ marginVertical: 12 }}>
-              <Text style={{ fontFamily: "Onest", color: Theme.colors.gray }}>
-                {t("close_room_desc")}
-              </Text>
-            </View>
-
-            <View
-              style={{ flexDirection: "row", gap: 12, alignSelf: "flex-end" }}
-            >
-              <Pressable
-                onPress={() => setModalVisible(false)}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.transparent,
-                  },
-                  styles.modalBottomButtons,
-                ]}
-              >
-                <Text style={{ fontFamily: "Onest", color: Theme.colors.red }}>
-                  {t("cancel")}
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleOnExit}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.transparent,
-                  },
-                  styles.modalBottomButtons,
-                ]}
-              >
-                <Text
-                  style={{ fontFamily: "Onest", color: Theme.colors.accent }}
-                >
-                  {t("accept")}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <CustomModal
+        title={t("close_room")}
+        description={t("close_room_desc")}
+        modalVisible={closeModalVisible}
+        onRequestClose={() => {
+          setCloseModalVisible(!closeModalVisible)
+        }}
+        onAccept={handleOnExit}
+      />
 
       <Pressable style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
         <View style={{ flex: 1, width: "100%" }}>
@@ -518,7 +503,10 @@ export default function Stop() {
             <View style={styles.columns}>
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, name: text })}
                 value={inputs.name}
@@ -526,7 +514,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, country: text })}
                 value={inputs.country}
@@ -534,7 +525,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, animal: text })}
                 value={inputs.animal}
@@ -542,7 +536,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, food: text })}
                 value={inputs.food}
@@ -550,7 +547,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, object: text })}
                 value={inputs.object}
@@ -561,7 +561,10 @@ export default function Stop() {
             <View style={styles.columns}>
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, lastName: text })}
                 value={inputs.lastName}
@@ -569,7 +572,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, color: text })}
                 value={inputs.color}
@@ -577,7 +583,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, artist: text })}
                 value={inputs.artist}
@@ -585,7 +594,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, fruit: text })}
                 value={inputs.fruit}
@@ -593,7 +605,10 @@ export default function Stop() {
               />
               <FocusInput
                 editable={
-                  gameData?.gameStatus === GameStatus.IN_PROGRESS && !isStarting
+                  mode === "offline"
+                    ? true
+                    : gameData?.gameStatus === GameStatus.IN_PROGRESS &&
+                      !isStarting
                 }
                 onChange={(text) => setInputs({ ...inputs, profession: text })}
                 value={inputs.profession}
@@ -602,7 +617,7 @@ export default function Stop() {
             </View>
           </View>
 
-          {gameData?.gameStatus !== GameStatus.STOPPED ? (
+          {gameData?.gameStatus !== GameStatus.STOPPED && mode !== "offline" ? (
             <View
               style={{
                 flexDirection: "column",
@@ -701,7 +716,8 @@ export default function Stop() {
               }}
             >
               <Text style={styles.texts}>
-                {t("round")}: {gameData?.round}
+                {t("round")}:{" "}
+                {gameData?.round === 0 ? 1 : (gameData?.round ?? 0)}
               </Text>
               <Text style={styles.texts}>
                 {t("letter")}: {letter}
@@ -765,7 +781,30 @@ export default function Stop() {
       </Pressable>
 
       <BottomSheetModal title={t("players")} ref={sheetRef}>
-        <View style={{ paddingVertical: 8, gap: 12 }}>
+        <View style={{ marginBottom: 8, gap: 12 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: Theme.colors.accent,
+                fontFamily: "Onest",
+                fontSize: 16,
+              }}
+            >
+              {gameData?.gameId}
+            </Text>
+
+            <Pressable onPress={copyRoomCode}>
+              <CopyIcon color={Theme.colors.accent} size={16} />
+            </Pressable>
+          </View>
+
           {gameData &&
             gameData.players.map((player) => (
               <View
