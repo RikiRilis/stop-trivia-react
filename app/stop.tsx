@@ -297,6 +297,7 @@ export default function Stop() {
     }
 
     if (flag === "restart") {
+      if (mode === "offline") handleRestartInputs()
       setRestartModalVisible(true)
     }
   }
@@ -448,7 +449,7 @@ export default function Stop() {
           ),
           headerRight: () => (
             <CurrentPlayers
-              onPress={() => sheetRef.current?.expand()}
+              onPress={() => mode !== "offline" && sheetRef.current?.expand()}
               players={gameData?.players.length}
             />
           ),
