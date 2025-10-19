@@ -65,6 +65,15 @@ export const UsersIcon = (props: any) => (
   <Feather name="users" color={Theme.colors.text} size={24} {...props} />
 )
 
+export const HashIcon = (props: any) => (
+  <FontAwesome5
+    name="slack-hash"
+    color={Theme.colors.text}
+    size={24}
+    {...props}
+  />
+)
+
 export const EyeIcon = (props: any) => (
   <Octicons name="eye" color={Theme.colors.text} size={24} {...props} />
 )

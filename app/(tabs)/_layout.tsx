@@ -24,10 +24,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="stats"
+        name="tictactoe"
         options={{
           tabBarIcon: ({ color }) => <StatsIcon color={color} />,
-          title: "Stats",
+          title: "TTT",
           tabBarActiveTintColor: Theme.colors.primary,
         }}
       />
