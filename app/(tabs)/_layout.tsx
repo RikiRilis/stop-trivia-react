@@ -19,7 +19,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           tabBarIcon: ({ color }) => <HomeIcon color={color} />,
-          title: "Home",
+          title: "Stop",
           tabBarActiveTintColor: Theme.colors.primary,
         }}
       />
