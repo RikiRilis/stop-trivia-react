@@ -16,7 +16,7 @@ class Fire {
   state = {
     stop: {
       gameId: "-1",
-      round: 1,
+      round: 0,
       currentLetter: "-",
       currentTime: 120,
       gameStatus: GameStatus.CREATED,
