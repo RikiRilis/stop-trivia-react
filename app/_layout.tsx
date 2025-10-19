@@ -1,3 +1,4 @@
+import "@/services/i18next"
 import React, { useEffect, useState } from "react"
 import { Image, Pressable, View } from "react-native"
 import { Link, Stack } from "expo-router"
@@ -5,7 +6,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { StatusBar } from "expo-status-bar"
 import { useFonts } from "expo-font"
-
 import { CogIcon } from "@/components/ui/Icons"
 import { Theme } from "@/constants/Theme"
 import SplashScreen from "@/components/ui/SplashScreen"
@@ -15,11 +15,17 @@ import {
   FirebaseAuthTypes,
   onAuthStateChanged,
 } from "@react-native-firebase/auth"
+import { useTranslation } from "react-i18next"
+import { useStorage } from "@/hooks/useStorage"
+import * as RNLocalize from "react-native-localize"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null)
+
+  const { i18n } = useTranslation()
+  const { getItem, setItem } = useStorage()
 
   const handleAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
     setUser(user)
@@ -27,6 +33,19 @@ export default function Layout() {
   }
 
   useEffect(() => {
+    const loadSettings = async () => {
+      const locales = RNLocalize.getLocales()
+      const vibration = await getItem("vibration")
+      const sound = await getItem("sound")
+      const languageCode = await getItem("language")
+
+      if (!vibration) setItem("vibration", String(true))
+      if (!sound) setItem("sound", String(true))
+      i18n.changeLanguage(languageCode ?? locales[0].languageCode)
+    }
+
+    loadSettings()
+
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged)
     return subscriber
   }, [])

@@ -9,7 +9,7 @@
       "@/assets": ["/assets/*"],
       "@/services": ["/services/*"],
       "@/interfaces": ["/interfaces/*"],
-      "@/languages": ["/languages/*"],
+      "@/locales": ["/locales/*"],
       "@/db": ["/db/*"],
       "@/libs": ["/libs/*"],
       "@/hooks": ["/hooks/*"],

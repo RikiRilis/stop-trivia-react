@@ -1,10 +1,21 @@
 import { Screen } from "@/components/ui/Screen"
-import { View } from "react-native"
+import { Text, View } from "react-native"
+import { Theme } from "@/constants/Theme"
 
 export default function TicTacToe() {
   return (
     <Screen>
-      <View></View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text
+          style={{
+            color: Theme.colors.gray,
+            fontFamily: "OnestBold",
+            fontSize: 32,
+          }}
+        >
+          Coming soon...
+        </Text>
+      </View>
     </Screen>
   )
 }

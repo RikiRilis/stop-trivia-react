@@ -36,6 +36,9 @@ import { getAuth } from "@react-native-firebase/auth"
 import { formatTime } from "@/libs/formatTime"
 import { useStorage } from "@/hooks/useStorage"
 import { parseBoolean } from "@/libs/parseBoolean"
+import { useTranslation } from "react-i18next"
+import { BottomSheetModal } from "@/components/BottomSheetModal"
+import BottomSheet from "@gorhom/bottom-sheet"
 
 export default function Stop() {
   const [gameData, setGameData] = useState<GameModel | null>(null)
@@ -61,11 +64,13 @@ export default function Stop() {
     profession: "",
   })
 
+  const sheetRef = useRef<BottomSheet>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const countdownStarted = useRef(false)
 
   const navigation = useNavigation()
   const { getItem } = useStorage()
+  const { t } = useTranslation()
 
   const { mode, id, time } = useLocalSearchParams<{
     mode: string
@@ -136,11 +141,13 @@ export default function Stop() {
       })
     }
 
+    if (mode === "offline") return
+
     unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
       if (!data) {
         if (mode === "join") {
           ToastAndroid.showWithGravity(
-            "The host closed the game",
+            t("host_closed_game"),
             ToastAndroid.SHORT,
             ToastAndroid.CENTER
           )
@@ -209,10 +216,10 @@ export default function Stop() {
   const setTitleByGameStatus = (gameStatus: number | undefined) => {
     switch (gameStatus) {
       case GameStatus.CREATED:
-        setTitle("Waiting for players")
+        setTitle(t("waiting_players"))
         break
       case GameStatus.IN_PROGRESS:
-        setTitle("Fill the spaces!")
+        setTitle(t("fill_spaces"))
         break
       case GameStatus.STOPPED:
         setTitle("STOP!")
@@ -230,7 +237,7 @@ export default function Stop() {
         if (gameData.players.length < 2) {
           vibrationEnabled && Vibration.vibrate(100)
           ToastAndroid.showWithGravity(
-            "You're alone!",
+            t("you_are_alone"),
             ToastAndroid.SHORT,
             ToastAndroid.CENTER
           )
@@ -240,7 +247,7 @@ export default function Stop() {
         if (gameData.players.length !== gameData.playersReady) {
           vibrationEnabled && Vibration.vibrate(100)
           ToastAndroid.showWithGravity(
-            "Not all players are ready",
+            t("not_all_players_ready"),
             ToastAndroid.SHORT,
             ToastAndroid.CENTER
           )
@@ -367,6 +374,8 @@ export default function Stop() {
 
   const handleBackPress = (data?: GameModel | null): boolean => {
     const currentData = data ?? gameData
+
+    if (mode === "offline") handleOnExit()
     if (!currentData) return true
     if (currentData.gameStatus === GameStatus.IN_PROGRESS) {
       vibrationEnabled && Vibration.vibrate(100)
@@ -403,7 +412,10 @@ export default function Stop() {
             <BackIcon size={34} onPress={() => handleBackPress(gameData)} />
           ),
           headerRight: () => (
-            <CurrentPlayers players={gameData?.players.length} />
+            <CurrentPlayers
+              onPress={() => sheetRef.current?.expand()}
+              players={gameData?.players.length}
+            />
           ),
         }}
       />
@@ -427,14 +439,13 @@ export default function Stop() {
                   fontSize: 18,
                 }}
               >
-                Close room
+                {t("close_room")}
               </Text>
             </View>
 
             <View style={{ marginVertical: 12 }}>
               <Text style={{ fontFamily: "Onest", color: Theme.colors.gray }}>
-                Are you sure you wan&apos;t to delete the game? It will kick out
-                all the players!
+                {t("close_room_desc")}
               </Text>
             </View>
 
@@ -453,7 +464,7 @@ export default function Stop() {
                 ]}
               >
                 <Text style={{ fontFamily: "Onest", color: Theme.colors.red }}>
-                  Cancel
+                  {t("cancel")}
                 </Text>
               </Pressable>
 
@@ -471,7 +482,7 @@ export default function Stop() {
                 <Text
                   style={{ fontFamily: "Onest", color: Theme.colors.accent }}
                 >
-                  Go!
+                  {t("accept")}
                 </Text>
               </Pressable>
             </View>
@@ -498,7 +509,7 @@ export default function Stop() {
                   fontSize: 18,
                 }}
               >
-                Time left: {formatTime(timeLeft)}
+                {t("time_left")}: {formatTime(timeLeft)}
               </Text>
             </View>
           )}
@@ -511,7 +522,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, name: text })}
                 value={inputs.name}
-                placeholder="Name"
+                placeholder={t("name")}
               />
               <FocusInput
                 editable={
@@ -519,7 +530,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, country: text })}
                 value={inputs.country}
-                placeholder="Country"
+                placeholder={t("country")}
               />
               <FocusInput
                 editable={
@@ -527,7 +538,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, animal: text })}
                 value={inputs.animal}
-                placeholder="Animal"
+                placeholder={t("animal")}
               />
               <FocusInput
                 editable={
@@ -535,7 +546,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, food: text })}
                 value={inputs.food}
-                placeholder="Food"
+                placeholder={t("food")}
               />
               <FocusInput
                 editable={
@@ -543,7 +554,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, object: text })}
                 value={inputs.object}
-                placeholder="Object"
+                placeholder={t("object")}
               />
             </View>
 
@@ -554,7 +565,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, lastName: text })}
                 value={inputs.lastName}
-                placeholder="Last Name"
+                placeholder={t("last_name")}
               />
               <FocusInput
                 editable={
@@ -562,7 +573,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, color: text })}
                 value={inputs.color}
-                placeholder="Color"
+                placeholder={t("color")}
               />
               <FocusInput
                 editable={
@@ -570,7 +581,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, artist: text })}
                 value={inputs.artist}
-                placeholder="Artist"
+                placeholder={t("artist")}
               />
               <FocusInput
                 editable={
@@ -578,7 +589,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, fruit: text })}
                 value={inputs.fruit}
-                placeholder="Fruit"
+                placeholder={t("fruit")}
               />
               <FocusInput
                 editable={
@@ -586,7 +597,7 @@ export default function Stop() {
                 }
                 onChange={(text) => setInputs({ ...inputs, profession: text })}
                 value={inputs.profession}
-                placeholder="Profession"
+                placeholder={t("profession")}
               />
             </View>
           </View>
@@ -689,9 +700,15 @@ export default function Stop() {
                 alignItems: "center",
               }}
             >
-              <Text style={styles.texts}>Round: {gameData?.round}</Text>
-              <Text style={styles.texts}>Letter: {letter}</Text>
-              <Text style={styles.texts}>Your points: {points}</Text>
+              <Text style={styles.texts}>
+                {t("round")}: {gameData?.round}
+              </Text>
+              <Text style={styles.texts}>
+                {t("letter")}: {letter}
+              </Text>
+              <Text style={styles.texts}>
+                {t("your_points")}: {points}
+              </Text>
             </View>
 
             <View
@@ -746,13 +763,57 @@ export default function Stop() {
           </View>
         </View>
       </Pressable>
+
+      <BottomSheetModal title={t("players")} ref={sheetRef}>
+        <View style={{ paddingVertical: 8, gap: 12 }}>
+          {gameData &&
+            gameData.players.map((player) => (
+              <View
+                key={player.id}
+                style={{
+                  padding: 16,
+                  borderRadius: 14,
+                  backgroundColor: Theme.colors.background2,
+                  justifyContent: "space-between",
+                  flexDirection: "row",
+                }}
+              >
+                <Text
+                  style={{
+                    color: Theme.colors.gray,
+                    fontFamily: "OnestBold",
+                    fontSize: 18,
+                  }}
+                >
+                  {player.name}
+                </Text>
+                <Text
+                  style={{
+                    color: Theme.colors.gray,
+                    fontFamily: "Onest",
+                    fontSize: 18,
+                  }}
+                >
+                  {player.points}
+                </Text>
+              </View>
+            ))}
+        </View>
+      </BottomSheetModal>
     </Screen>
   )
 }
 
-const CurrentPlayers = ({ players = 1 }: { players?: number }) => {
+const CurrentPlayers = ({
+  players = 1,
+  onPress,
+}: {
+  players?: number
+  onPress: () => void
+}) => {
   return (
-    <View
+    <Pressable
+      onPress={onPress}
       style={{
         flexDirection: "row",
         gap: 8,
@@ -764,7 +825,7 @@ const CurrentPlayers = ({ players = 1 }: { players?: number }) => {
       <Text style={{ color: Theme.colors.accent, fontFamily: "OnestBold" }}>
         {players}/4
       </Text>
-    </View>
+    </Pressable>
   )
 }
 

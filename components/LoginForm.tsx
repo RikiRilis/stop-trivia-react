@@ -42,6 +42,7 @@ import {
 } from "@react-native-firebase/auth"
 import * as Google from "expo-auth-session/providers/google"
 import { auth } from "@/libs/firebaseConfig"
+import { useTranslation } from "react-i18next"
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("")
@@ -53,6 +54,8 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null)
   const [btnScale] = useState(new Animated.Value(1))
   const [signInForm, setSignInForm] = useState(true)
+
+  const { t } = useTranslation()
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_AUTH_WEB_CLIENT_ID,
@@ -77,33 +80,33 @@ export const LoginForm = () => {
 
     if (email.trim() === "" || password.trim() === "") {
       Vibration.vibrate(100)
-      return setError("Please enter the credentials.")
+      return setError(t("error_login_credentials"))
     }
 
     if (!signInForm) {
       if (password !== repeatPassword && password.length >= 6) {
         Vibration.vibrate(100)
-        return setError("Passwords must be equals")
+        return setError(t("error_login_passwords_equals"))
       }
 
       if (displayName.trim().length < 3) {
         Vibration.vibrate(100)
-        return setError("Username must be at least 3 characters")
+        return setError(t("error_login_username_min"))
       }
 
       if (displayName.trim().length > 20) {
         Vibration.vibrate(100)
-        return setError("Username must be less than 20 characters")
+        return setError(t("error_login_username_max"))
       }
 
       if (displayName.trim().includes(" ")) {
         Vibration.vibrate(100)
-        return setError("Username must not contain spaces")
+        return setError(t("error_login_username_spaces"))
       }
 
       if (displayName.trim() === "") {
         Vibration.vibrate(100)
-        return setError("Please enter the username")
+        return setError(t("error_login_username_empty"))
       }
     }
     return null
@@ -117,14 +120,14 @@ export const LoginForm = () => {
 
   const handleForgot = () => {
     if (!email && email === "") {
-      setError("Please enter the email")
+      setError(t("error_login_email_empty"))
       return
     }
 
     if (email || email !== "") {
       sendPasswordResetEmail(auth, email).then(() => {
         ToastAndroid.showWithGravity(
-          "Email sent!",
+          t("email_sent"),
           ToastAndroid.SHORT,
           ToastAndroid.CENTER
         )
@@ -159,7 +162,7 @@ export const LoginForm = () => {
               })
               sendEmailVerification(res.user)
               ToastAndroid.showWithGravity(
-                "Verify email sent to your inbox!",
+                t("verification_email_sent"),
                 ToastAndroid.SHORT,
                 ToastAndroid.CENTER
               )
@@ -169,35 +172,35 @@ export const LoginForm = () => {
         }
       }
     } catch (e: any) {
-      let message: string = "Please enter the credentials."
+      let message: string = t("error_login_credentials")
       switch (e.code) {
         case "auth/email-already-in-use":
           Vibration.vibrate(100)
-          message = "This email is already in use. Please, sign in."
+          message = t("error_login_email_used")
           break
         case "auth/user-not-found":
           Vibration.vibrate(100)
-          message = "No user found with this email."
+          message = t("error_login_email_not_found")
           break
         case "auth/wrong-password":
           Vibration.vibrate(100)
-          message = "Incorrect password."
+          message = t("error_login_password_incorrect")
           break
         case "auth/too-many-requests":
           Vibration.vibrate(100)
-          message = "Too many attempts. Try again later."
+          message = t("error_login_many_attemps")
           break
         case "auth/invalid-email":
           Vibration.vibrate(100)
-          message = "Invalid email address."
+          message = t("error_login_email_invalid")
           break
         case "auth/weak-password":
           Vibration.vibrate(100)
-          message = "Password must be at least 6 characters."
+          message = t("error_login_password_min")
           break
         case "auth/invalid-credential":
           Vibration.vibrate(100)
-          message = "Invalid email or password."
+          message = t("error_login_email_password_invalid")
           break
       }
 
@@ -242,7 +245,7 @@ export const LoginForm = () => {
 
               <TextInput
                 style={styles.input}
-                placeholder="Username"
+                placeholder={t("username")}
                 placeholderTextColor={Theme.colors.darkGray}
                 keyboardType="default"
                 autoCapitalize="none"
@@ -263,7 +266,7 @@ export const LoginForm = () => {
             </View>
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t("email")}
               placeholderTextColor={Theme.colors.darkGray}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -284,7 +287,7 @@ export const LoginForm = () => {
 
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t("password")}
               placeholderTextColor={Theme.colors.darkGray}
               secureTextEntry={!showPassword}
               value={password}
@@ -320,7 +323,7 @@ export const LoginForm = () => {
 
               <TextInput
                 style={styles.input}
-                placeholder="Repet password"
+                placeholder={t("repeat_password")}
                 placeholderTextColor={Theme.colors.darkGray}
                 secureTextEntry={!showPassword}
                 value={repeatPassword}
@@ -354,7 +357,7 @@ export const LoginForm = () => {
 
             {signInForm && (
               <Pressable onPress={handleForgot}>
-                <Text style={styles.forgotText}>Forgot?</Text>
+                <Text style={styles.forgotText}>{t("forgot")}</Text>
               </Pressable>
             )}
           </View>
@@ -378,7 +381,7 @@ export const LoginForm = () => {
                 <ActivityIndicator color={Theme.colors.text} />
               ) : (
                 <Text style={styles.submitText}>
-                  {signInForm ? "Sign in" : "Sign up"}
+                  {signInForm ? t("sign_in") : t("sign_up")}
                 </Text>
               )}
             </Pressable>
@@ -386,14 +389,12 @@ export const LoginForm = () => {
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              {signInForm
-                ? "Don't have an account?"
-                : "Already have an account?"}
+              {signInForm ? t("sign_up_question") : t("sign_in_question")}
             </Text>
 
             <Pressable onPress={handleChangeForm}>
               <Text style={styles.signupText}>
-                {signInForm ? "Sign up" : "Sign in"}
+                {signInForm ? t("sign_up") : t("sign_in")}
               </Text>
             </Pressable>
           </View>
@@ -410,7 +411,7 @@ export const LoginForm = () => {
               onPress={() => Linking.openURL("https://rikirilis.com/privacy")}
               style={styles.footerPolicy}
             >
-              Privacy Policy
+              {t("privacy_policy")}
             </Text>
           </View>
 

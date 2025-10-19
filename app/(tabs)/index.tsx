@@ -19,6 +19,7 @@ import { ModesButton } from "@/components/ModesButton"
 import { FocusInput } from "@/components/FocusInput"
 import Fire from "@/db/Fire"
 import { GameStatus } from "@/interfaces/Game"
+import { useTranslation } from "react-i18next"
 
 export default function Index() {
   const [vibrationEnabled, setVibrationEnabled] = useState(true)
@@ -28,6 +29,7 @@ export default function Index() {
 
   const { navigate } = useRouter()
   const { getItem } = useStorage()
+  const { t } = useTranslation()
 
   useFocusEffect(
     useCallback(() => {
@@ -54,7 +56,7 @@ export default function Index() {
 
       if (id.length !== 6) {
         vibrationEnabled && Vibration.vibrate(100)
-        setError("Please enter a valid code")
+        setError(t("error_game_invalid_code"))
         setLoading(false)
         return
       }
@@ -63,14 +65,14 @@ export default function Index() {
         Fire.getGame("stop", id).then((game) => {
           if (!game) {
             vibrationEnabled && Vibration.vibrate(100)
-            setError("No game found with this code")
+            setError(t("error_game_not_found"))
             setLoading(false)
             return
           }
 
           if (game.players.length >= 4) {
             vibrationEnabled && Vibration.vibrate(100)
-            setError("This game is full")
+            setError(t("error_game_full"))
             setLoading(false)
             return
           }
@@ -78,7 +80,7 @@ export default function Index() {
           if (game) {
             if (game.gameStatus === GameStatus.IN_PROGRESS) {
               vibrationEnabled && Vibration.vibrate(100)
-              setError("This game has already started")
+              setError(t("error_game_started"))
               setLoading(false)
               return
             }
@@ -113,7 +115,7 @@ export default function Index() {
               fontFamily: "Onest",
             }}
           >
-            Choose your mode
+            {t("choose_your_mode")}
           </Text>
 
           <LottieView
@@ -137,15 +139,15 @@ export default function Index() {
         >
           <ModesButton
             icon={<OfflineIcon size={32} color={Theme.colors.accent} />}
-            title="Play offline"
-            subtitle="Play with friends in person!"
+            title={t("play_offline")}
+            subtitle={t("play_offline_desc")}
             flag="offline"
             onPress={() => handlePress("offline")}
           />
           <ModesButton
             icon={<OnlineIcon size={32} color={Theme.colors.accent} />}
-            title="Play online"
-            subtitle="Connect over the network"
+            title={t("play_online")}
+            subtitle={t("play_online_desc")}
             flag="online"
             onPress={() => handlePress("online")}
           />
@@ -159,7 +161,7 @@ export default function Index() {
                 ></ActivityIndicator>
               ) : undefined
             }
-            title="Join a game"
+            title={t("join_game")}
             flag="join"
             onPress={() => handlePress("join")}
           >

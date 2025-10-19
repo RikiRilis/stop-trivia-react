@@ -34,6 +34,7 @@ import BottomSheet from "@gorhom/bottom-sheet"
 import Clipboard from "@react-native-clipboard/clipboard"
 import { signOut } from "@react-native-firebase/auth"
 import { auth } from "@/libs/firebaseConfig"
+import { useTranslation } from "react-i18next"
 
 const languageCodes = ["en", "es"]
 
@@ -47,6 +48,8 @@ export default function Settings() {
   const [userId, setUserId] = useState<string | undefined>(
     "1234567890101112131415"
   )
+
+  const { t, i18n } = useTranslation()
   const { setItem, getItem, removeItem } = useStorage()
 
   const sheetRef = useRef<BottomSheet>(null)
@@ -88,13 +91,15 @@ export default function Settings() {
   const toggleLanguage = (code: string) => {
     setLanguageSelected(code)
     setItem("language", code)
+    sheetRef.current?.close()
+    i18n.changeLanguage(code)
   }
 
   const copyUserId = () => {
     isVibrationEnabled && Vibration.vibrate(10)
     Clipboard.setString(userId ?? "")
     ToastAndroid.showWithGravity(
-      "Copied to clipboard",
+      t("copied_clipboard"),
       ToastAndroid.SHORT,
       ToastAndroid.CENTER
     )
@@ -118,7 +123,7 @@ export default function Settings() {
       <Stack.Screen
         options={{
           headerTintColor: Theme.colors.text,
-          headerTitle: "Settings",
+          headerTitle: t("settings"),
           headerTitleStyle: {
             fontSize: 24,
             fontFamily: "Onest",
@@ -202,9 +207,9 @@ export default function Settings() {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Text style={{ color: Theme.colors.gray }}>Vibration</Text>
+            <Text style={{ color: Theme.colors.gray }}>{t("vibration")}</Text>
             <Text style={{ color: Theme.colors.darkGray }}>
-              Turn on/off haptic vibration using the game.
+              {t("vibration_desc")}
             </Text>
           </View>
 
@@ -239,9 +244,9 @@ export default function Settings() {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Text style={{ color: Theme.colors.gray }}>Sound</Text>
+            <Text style={{ color: Theme.colors.gray }}>{t("sound")}</Text>
             <Text style={{ color: Theme.colors.darkGray }}>
-              Turn on/off haptic sound using the game.
+              {t("sound_desc")}
             </Text>
           </View>
 
@@ -265,8 +270,8 @@ export default function Settings() {
 
         <SettingsButton
           onPress={() => sheetRef.current?.expand()}
-          title="Language"
-          description={languageSelected === "es" ? "Spanish" : "English"}
+          title={t("language")}
+          description={languageSelected === "es" ? t("es") : t("en")}
           icon={<LanguageIcon color={Theme.colors.gray} />}
         />
 
@@ -274,22 +279,22 @@ export default function Settings() {
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/privacy")}
-          title="Privacy Policy"
-          description="Read our privacy policy."
+          title={t("privacy_policy")}
+          description={t("privacy_policy_desc")}
           icon={<PrivacyIcon color={Theme.colors.gray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/terms")}
-          title="Terms & Conditions"
-          description="Read our Terms & Conditions."
+          title={t("terms_conditions")}
+          description={t("terms_conditions_desc")}
           icon={<ListIcon color={Theme.colors.gray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com")}
-          title="Site"
-          description="Visit the creator's website."
+          title={t("site")}
+          description={t("site_desc")}
           icon={<WebIcon color={Theme.colors.gray} />}
         />
 
@@ -305,7 +310,7 @@ export default function Settings() {
         )}
       </ScrollView>
 
-      <BottomSheetModal title="Language" ref={sheetRef}>
+      <BottomSheetModal title={t("language")} ref={sheetRef}>
         <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
           {languageCodes.map((option) => {
             const isSelected = languageSelected === option

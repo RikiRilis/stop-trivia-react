@@ -8,6 +8,7 @@ module.exports = defineConfig([
     ignores: ["dist/*"],
     rules: {
       "react-hooks/exhaustive-deps": "off",
+      "import/no-named-as-default-member": "off",
       "semi": ["error", "never"],
     }
   }
