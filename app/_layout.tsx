@@ -36,11 +36,9 @@ export default function Layout() {
     const loadSettings = async () => {
       const locales = RNLocalize.getLocales()
       const vibration = await getItem("vibration")
-      const sound = await getItem("sound")
       const languageCode = await getItem("language")
 
       if (!vibration) setItem("vibration", String(true))
-      if (!sound) setItem("sound", String(true))
       i18n.changeLanguage(languageCode ?? locales[0].languageCode)
     }
 

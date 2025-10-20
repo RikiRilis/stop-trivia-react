@@ -6,7 +6,6 @@ import {
   ListIcon,
   LogoutIcon,
   PrivacyIcon,
-  SoundIcon,
   UserIcon,
   VibrationIcon,
   WebIcon,
@@ -40,7 +39,6 @@ const languageCodes = ["en", "es"]
 
 export default function Settings() {
   const [isVibrationEnabled, setIsVibrationEnabled] = useState(false)
-  const [isSoundEnabled, setIsSoundEnabled] = useState(false)
   const [languageSelected, setLanguageSelected] = useState<string>("en")
   const [userName, setUserName] = useState<string | null | undefined>(
     "Anon-12345678"
@@ -58,11 +56,9 @@ export default function Settings() {
   useEffect(() => {
     const loadSettings = async () => {
       const vibrationValue = await getItem("vibration")
-      const soundValue = await getItem("sound")
       const languageCode = await getItem("language")
 
       setIsVibrationEnabled(parseBoolean(vibrationValue))
-      setIsSoundEnabled(parseBoolean(soundValue))
       setLanguageSelected(languageCode ?? "en")
       setUserId(auth.currentUser?.uid)
       setUserName(auth.currentUser?.displayName)
@@ -76,14 +72,6 @@ export default function Settings() {
       const newValue = !prev
       setItem("vibration", String(newValue))
       if (newValue) Vibration.vibrate(10)
-      return newValue
-    })
-  }
-
-  const toggleSoundSwitch = () => {
-    setIsSoundEnabled((prev) => {
-      const newValue = !prev
-      setItem("sound", String(newValue))
       return newValue
     })
   }
@@ -225,43 +213,6 @@ export default function Settings() {
               ios_backgroundColor="#3e3e3e"
               onValueChange={toggleVibrationSwitch}
               value={isVibrationEnabled}
-            />
-          </View>
-        </PlatformPressable>
-
-        <PlatformPressable
-          style={{
-            flexDirection: "row",
-            gap: 12,
-            alignItems: "center",
-            paddingVertical: 16,
-            padding: 16,
-          }}
-          onPress={toggleSoundSwitch}
-        >
-          <View>
-            <SoundIcon color={Theme.colors.gray} />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: Theme.colors.gray }}>{t("sound")}</Text>
-            <Text style={{ color: Theme.colors.darkGray }}>
-              {t("sound_desc")}
-            </Text>
-          </View>
-
-          <View>
-            <Switch
-              trackColor={{
-                false: Theme.colors.darkGray,
-                true: Theme.colors.primary2,
-              }}
-              thumbColor={
-                isSoundEnabled ? Theme.colors.primary : Theme.colors.text
-              }
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSoundSwitch}
-              value={isSoundEnabled}
             />
           </View>
         </PlatformPressable>
