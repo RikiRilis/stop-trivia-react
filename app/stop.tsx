@@ -337,6 +337,8 @@ export default function Stop() {
       time--
       setTimeLeft(time - elapsed)
 
+      if (time <= 3) vibrationEnabled && Vibration.vibrate(10)
+
       if (time === 0) {
         stopTimer()
         vibrationEnabled && Vibration.vibrate(1000)
@@ -807,37 +809,39 @@ export default function Stop() {
           </View>
 
           {gameData &&
-            gameData.players.map((player) => (
-              <View
-                key={player.id}
-                style={{
-                  padding: 16,
-                  borderRadius: 14,
-                  backgroundColor: Theme.colors.background2,
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                }}
-              >
-                <Text
+            gameData.players
+              .sort((a, b) => b.points - a.points)
+              .map((player) => (
+                <View
+                  key={player.id}
                   style={{
-                    color: Theme.colors.gray,
-                    fontFamily: "OnestBold",
-                    fontSize: 18,
+                    padding: 16,
+                    borderRadius: 14,
+                    backgroundColor: Theme.colors.background2,
+                    justifyContent: "space-between",
+                    flexDirection: "row",
                   }}
                 >
-                  {player.name}
-                </Text>
-                <Text
-                  style={{
-                    color: Theme.colors.gray,
-                    fontFamily: "Onest",
-                    fontSize: 18,
-                  }}
-                >
-                  {player.points}
-                </Text>
-              </View>
-            ))}
+                  <Text
+                    style={{
+                      color: Theme.colors.gray,
+                      fontFamily: "OnestBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {player.name}
+                  </Text>
+                  <Text
+                    style={{
+                      color: Theme.colors.gray,
+                      fontFamily: "Onest",
+                      fontSize: 18,
+                    }}
+                  >
+                    {player.points}
+                  </Text>
+                </View>
+              ))}
         </View>
       </BottomSheetModal>
     </Screen>
