@@ -7,6 +7,9 @@ import {
   Pressable,
   Keyboard,
   ActivityIndicator,
+  StyleSheet,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native"
 import { LinkIcon, OfflineIcon, OnlineIcon } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
@@ -26,6 +29,8 @@ export default function Index() {
   const [id, setId] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [onlineLoading, setOnlineLoading] = useState(false)
 
   const { navigate } = useRouter()
   const { getItem } = useStorage()
@@ -42,6 +47,7 @@ export default function Index() {
   )
 
   const handleCodeChange = (text: string) => {
+    setError(null)
     setId(text.trim().toLocaleLowerCase())
   }
 
@@ -87,6 +93,7 @@ export default function Index() {
 
             setLoading(false)
             setError(null)
+            setId("")
 
             navigate({
               pathname: "stop",
@@ -96,17 +103,127 @@ export default function Index() {
         })
     }
 
-    if (flag !== "join") {
+    if (flag === "offline") {
+      setLoading(false)
+      setError(null)
+      setId("")
+
       navigate({
         pathname: "stop",
         params: { mode: flag, id, time },
       })
     }
+
+    if (flag === "online") {
+      if (onlineLoading) return
+
+      setOnlineLoading(true)
+      setModalVisible(true)
+    }
+  }
+
+  const handleCreateGame = (mode: string, id: string, time: number) => {
+    vibrationEnabled && Vibration.vibrate(10)
+
+    setLoading(false)
+    setError(null)
+    setId("")
+    setOnlineLoading(false)
+    setModalVisible(false)
+    navigate({
+      pathname: "stop",
+      params: { mode, id, time },
+    })
   }
 
   return (
     <Screen>
-      <Pressable style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false)
+          setOnlineLoading(false)
+        }}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setModalVisible(false)
+            setOnlineLoading(false)
+          }}
+        >
+          <View style={styles.centeredView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalView}>
+                <Text
+                  style={{
+                    color: Theme.colors.accent,
+                    fontFamily: "OnestBold",
+                    fontSize: 18,
+                    alignSelf: "center",
+                    marginBottom: 16,
+                  }}
+                >
+                  {t("select_time")}
+                </Text>
+
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <Pressable
+                    onPress={() => handleCreateGame("online", id, 60)}
+                    style={({ pressed }) => [
+                      {
+                        backgroundColor: pressed
+                          ? Theme.colors.background2
+                          : Theme.colors.primary2,
+                      },
+                      styles.buttons,
+                    ]}
+                  >
+                    <Text style={styles.texts}>1 min</Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => handleCreateGame("online", id, 180)}
+                    style={({ pressed }) => [
+                      {
+                        backgroundColor: pressed
+                          ? Theme.colors.background2
+                          : Theme.colors.primary2,
+                      },
+                      styles.buttons,
+                    ]}
+                  >
+                    <Text style={styles.texts}>3 mins</Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => handleCreateGame("online", id, 300)}
+                    style={({ pressed }) => [
+                      {
+                        backgroundColor: pressed
+                          ? Theme.colors.background2
+                          : Theme.colors.primary2,
+                      },
+                      styles.buttons,
+                    ]}
+                  >
+                    <Text style={styles.texts}>5 mins</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={() => {
+          id === "" && setError(null)
+          Keyboard.dismiss()
+        }}
+      >
         <View style={{ flexDirection: "row", marginVertical: 16, gap: 12 }}>
           <Text
             style={{
@@ -146,6 +263,14 @@ export default function Index() {
           />
           <ModesButton
             icon={<OnlineIcon size={32} color={Theme.colors.accent} />}
+            rightIcon={
+              onlineLoading ? (
+                <ActivityIndicator
+                  color={Theme.colors.accent}
+                  style={{ width: 32, height: 32 }}
+                ></ActivityIndicator>
+              ) : undefined
+            }
             title={t("play_online")}
             subtitle={t("play_online_desc")}
             flag="online"
@@ -166,6 +291,8 @@ export default function Index() {
             onPress={() => handlePress("join")}
           >
             <FocusInput
+              editable={!loading}
+              value={id}
               capitalize="none"
               onChange={handleCodeChange}
               placeholder="Code"
@@ -189,3 +316,46 @@ export default function Index() {
     </Screen>
   )
 }
+
+const styles = StyleSheet.create({
+  columns: {
+    flex: 1,
+    flexDirection: "column",
+    gap: 18,
+  },
+  buttons: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    alignSelf: "flex-start",
+  },
+  texts: {
+    color: Theme.colors.lightGray,
+    alignSelf: "flex-start",
+    fontFamily: "OnestBold",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: Theme.colors.background,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  modalBottomButtons: {
+    padding: 12,
+    borderRadius: 16,
+  },
+})

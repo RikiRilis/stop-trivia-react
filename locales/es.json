@@ -1,4 +1,5 @@
 {
+  "select_time": "Seleccionar temporizador",
   "restart_inputs": "Restablecer campos",
   "restart_inputs_desc": "Esto reiniciará todos los campos y los valores ingresados. Tus puntos se conservarán. ¿Quieres continuar?",
   "players": "Jugadores",
