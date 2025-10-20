@@ -74,6 +74,10 @@ export const HashIcon = (props: any) => (
   />
 )
 
+export const VerifiedIcon = (props: any) => (
+  <Octicons name="verified" color={Theme.colors.text} size={24} {...props} />
+)
+
 export const EyeIcon = (props: any) => (
   <Octicons name="eye" color={Theme.colors.text} size={24} {...props} />
 )

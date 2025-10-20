@@ -18,6 +18,7 @@ import {
 import { useTranslation } from "react-i18next"
 import { useStorage } from "@/hooks/useStorage"
 import * as RNLocalize from "react-native-localize"
+import { WaitingVerification } from "@/components/WaitingVerification"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
@@ -68,34 +69,46 @@ export default function Layout() {
       <StatusBar style="auto" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         {user ? (
-          <Stack
-            screenOptions={{
-              animationMatchesGesture: true,
-              animation: "default",
-              animationDuration: 100,
-              contentStyle: { backgroundColor: Theme.colors.background },
-              headerStyle: { backgroundColor: Theme.colors.background },
-              headerTintColor: Theme.colors.text,
-              headerTitle: "Stop Trivia",
-              headerTitleStyle: {
-                fontSize: 24,
-                fontFamily: "OnestBold",
-              },
-              headerLeft: () => (
-                <Image
-                  source={require("@/assets/ic_brand.png")}
-                  style={{ width: 40, height: 40 }}
-                />
-              ),
-              headerRight: () => (
-                <Link asChild href="/settings">
-                  <Pressable>
-                    <CogIcon />
-                  </Pressable>
-                </Link>
-              ),
-            }}
-          />
+          user?.emailVerified ? (
+            <Stack
+              screenOptions={{
+                animationMatchesGesture: true,
+                animation: "default",
+                animationDuration: 100,
+                contentStyle: { backgroundColor: Theme.colors.background },
+                headerStyle: { backgroundColor: Theme.colors.background },
+                headerTintColor: Theme.colors.text,
+                headerTitle: "Stop Trivia",
+                headerTitleStyle: {
+                  fontSize: 24,
+                  fontFamily: "OnestBold",
+                },
+                headerLeft: () => (
+                  <Image
+                    source={require("@/assets/ic_brand.png")}
+                    style={{ width: 40, height: 40 }}
+                  />
+                ),
+                headerRight: () => (
+                  <Link asChild href="/settings">
+                    <Pressable>
+                      <CogIcon />
+                    </Pressable>
+                  </Link>
+                ),
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <WaitingVerification />
+            </View>
+          )
         ) : (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

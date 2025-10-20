@@ -48,7 +48,7 @@ export default function Settings() {
   )
 
   const { t, i18n } = useTranslation()
-  const { setItem, getItem, removeItem } = useStorage()
+  const { setItem, getItem } = useStorage()
 
   const sheetRef = useRef<BottomSheet>(null)
   const navigation = useNavigation()
@@ -95,7 +95,6 @@ export default function Settings() {
 
   const handleSignOut = () => {
     if (auth) {
-      removeItem("user")
       signOut(auth)
     }
   }
