@@ -150,7 +150,7 @@ export default function Settings() {
               fontSize: 24,
             }}
           >
-            {userName}
+            {userName ?? "Stop Test"}
           </Text>
 
           <View

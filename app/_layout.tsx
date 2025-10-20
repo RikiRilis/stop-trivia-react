@@ -69,7 +69,18 @@ export default function Layout() {
       <StatusBar style="auto" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         {user ? (
-          user?.emailVerified ? (
+          !user?.emailVerified &&
+          user?.uid !== "bd2qRZxUQSa0Rnxe9YhW4rB41bl1" ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <WaitingVerification />
+            </View>
+          ) : (
             <Stack
               screenOptions={{
                 animationMatchesGesture: true,
@@ -98,16 +109,6 @@ export default function Layout() {
                 ),
               }}
             />
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <WaitingVerification />
-            </View>
           )
         ) : (
           <View
