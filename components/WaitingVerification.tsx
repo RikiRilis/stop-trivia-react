@@ -82,7 +82,7 @@ export const WaitingVerification = () => {
   return (
     <View style={styles.container}>
       <VerifiedIcon color={Theme.colors.accent} size={132} />
-      <Text style={styles.title}>Verify your email</Text>
+      <Text style={styles.title}>{t("verify_your_email")}</Text>
       <Text style={styles.subtitle}>
         {t("verify_your_email_desc_1")}
         {"\n"}
