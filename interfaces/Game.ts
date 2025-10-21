@@ -1,6 +1,6 @@
 import { Player } from "@/interfaces/Player"
 
-export interface GameModel {
+export interface StopModel {
   gameId: string
   round: number
   currentLetter: string
@@ -8,6 +8,29 @@ export interface GameModel {
   gameStatus: GameStatus
   playersReady: number
   players: Player[]
+  host: string
+  startTime: number
+  timestamp: number
+}
+
+export interface TTTModel {
+  gameId: string
+  round: number
+  currentPlayer: string
+  gameStatus: GameStatus
+  playersReady: number
+  players: Player[]
+  filledPos: [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ]
   host: string
   startTime: number
   timestamp: number
