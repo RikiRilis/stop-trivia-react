@@ -15,6 +15,7 @@ import { PlatformPressable } from "@react-navigation/elements"
 import { Stack, useNavigation } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import {
+  Image,
   Linking,
   Pressable,
   ScrollView,
@@ -31,20 +32,36 @@ import { parseBoolean } from "@/libs/parseBoolean"
 import { BottomSheetModal } from "@/components/BottomSheetModal"
 import BottomSheet from "@gorhom/bottom-sheet"
 import Clipboard from "@react-native-clipboard/clipboard"
-import { signOut } from "@react-native-firebase/auth"
-import { auth } from "@/libs/firebaseConfig"
+import { signOut, updateProfile } from "@react-native-firebase/auth"
+import { auth, storage } from "@/db/firebaseConfig"
 import { useTranslation } from "react-i18next"
+import { Updaloading } from "@/components/Uploading"
+import * as ImagePicker from "expo-image-picker"
+import NetInfo from "@react-native-community/netinfo"
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "@react-native-firebase/storage"
 
 const languageCodes = ["en", "es"]
 
 export default function Settings() {
   const [isVibrationEnabled, setIsVibrationEnabled] = useState(false)
   const [languageSelected, setLanguageSelected] = useState<string>("en")
+  const [image, setImage] = useState("")
+  const [progress, setProgress] = useState(0)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [connection, setConnection] = useState(true)
   const [userName, setUserName] = useState<string | null | undefined>(
     "Anon-12345678"
   )
   const [userId, setUserId] = useState<string | undefined>(
     "1234567890101112131415"
+  )
+  const [userEmail, setUserEmail] = useState<string | undefined>(
+    "email@email.com"
   )
 
   const { t, i18n } = useTranslation()
@@ -61,10 +78,17 @@ export default function Settings() {
       setIsVibrationEnabled(parseBoolean(vibrationValue))
       setLanguageSelected(languageCode ?? "en")
       setUserId(auth.currentUser?.uid)
+      setUserEmail(auth.currentUser?.email ?? "email@email.com")
       setUserName(auth.currentUser?.displayName)
     }
 
+    const unsubscription = NetInfo.addEventListener((state) => {
+      setConnection(state.isConnected ?? false)
+    })
+
     loadSettings()
+
+    return unsubscription()
   }, [])
 
   const toggleVibrationSwitch = () => {
@@ -99,6 +123,81 @@ export default function Settings() {
     }
   }
 
+  const handlePickImage = async () => {
+    await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [2, 2],
+      quality: 0.5,
+      allowsMultipleSelection: false,
+    })
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+      setModalVisible(true)
+    }
+  }
+
+  const uploadImage = async (uri: string) => {
+    if (!connection) {
+      ToastAndroid.showWithGravity(
+        t("you_are_offline"),
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      )
+      return
+    }
+    if (!auth.currentUser) return
+    if (uploading) return
+
+    setUploading(true)
+
+    const response = await fetch(uri)
+    const blob = await response.blob()
+    const storageRef = ref(storage, `Profiles/${auth.currentUser.uid}`)
+    const uploadTask = uploadBytesResumable(storageRef, blob)
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        setProgress(+progress.toFixed())
+      },
+      (error) => {
+        console.log("Upliad failed:", error)
+        setImage("")
+        setModalVisible(false)
+        ToastAndroid.showWithGravity(
+          t("error_uploading"),
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        )
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot!.ref).then(async (downloadURL) => {
+          await updateProfile(auth.currentUser!, { photoURL: downloadURL })
+          setImage(downloadURL)
+          setModalVisible(false)
+          setProgress(0)
+          setUploading(false)
+        })
+      }
+    )
+  }
+
+  const handleAccept = async (uri: string) => {
+    await uploadImage(uri)
+  }
+
+  const handleClose = () => {
+    setModalVisible(false)
+    setImage("")
+    setProgress(0)
+    setUploading(false)
+  }
+
   return (
     <View
       style={{
@@ -122,6 +221,15 @@ export default function Settings() {
         }}
       />
 
+      <Updaloading
+        onAccept={() => handleAccept(image)}
+        onClose={handleClose}
+        modalVisible={modalVisible}
+        image={image}
+        progress={progress}
+        uploading={uploading}
+      />
+
       <ScrollView style={{ flex: 1 }}>
         <View
           style={{
@@ -130,18 +238,35 @@ export default function Settings() {
             paddingBottom: 22,
           }}
         >
-          <View
+          <Pressable
+            onPress={handlePickImage}
             style={{
+              width: auth.currentUser?.photoURL ? 96 : 64,
+              height: auth.currentUser?.photoURL ? 96 : 64,
               justifyContent: "center",
               alignItems: "center",
               backgroundColor: Theme.colors.primary2,
-              padding: 12,
+              padding: auth.currentUser?.photoURL ? 0 : 12,
               borderRadius: "100%",
               marginBottom: 4,
+              overflow: "hidden",
             }}
           >
-            <UserIcon size={64} color={Theme.colors.accent} />
-          </View>
+            {auth.currentUser?.photoURL ? (
+              <Image
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  resizeMode: "contain",
+                  borderRadius: 6,
+                  alignSelf: "center",
+                }}
+                source={{ uri: auth.currentUser?.photoURL }}
+              />
+            ) : (
+              <UserIcon size={64} color={Theme.colors.accent} />
+            )}
+          </Pressable>
 
           <Text
             style={{
@@ -151,6 +276,16 @@ export default function Settings() {
             }}
           >
             {userName ?? "Stop Test"}
+          </Text>
+
+          <Text
+            style={{
+              color: Theme.colors.gray,
+              fontFamily: "Onest",
+              fontSize: 12,
+            }}
+          >
+            {userEmail}
           </Text>
 
           <View
