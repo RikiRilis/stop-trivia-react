@@ -10,6 +10,7 @@ import {
   ToastAndroid,
   BackHandler,
   NativeEventSubscription,
+  ActivityIndicator,
 } from "react-native"
 import {
   Stack,
@@ -21,8 +22,10 @@ import {
   BackIcon,
   CheckIcon,
   CopyIcon,
+  OfflineIcon,
   PlayIcon,
   RestartIcon,
+  UserIcon,
   UsersIcon,
 } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
@@ -31,7 +34,7 @@ import { FocusInput } from "@/components/FocusInput"
 import { PlayingButton } from "@/components/PlayingButton"
 import Fire from "@/db/Fire"
 import { sixDigit } from "@/libs/randomId"
-import { GameModel, GameStatus } from "@/interfaces/Game"
+import { StopModel, GameStatus } from "@/interfaces/Game"
 import { getAuth } from "@react-native-firebase/auth"
 import { formatTime } from "@/libs/formatTime"
 import { useStorage } from "@/hooks/useStorage"
@@ -41,9 +44,10 @@ import { BottomSheetModal } from "@/components/BottomSheetModal"
 import BottomSheet from "@gorhom/bottom-sheet"
 import { CustomModal } from "@/components/CustomModal"
 import Clipboard from "@react-native-clipboard/clipboard"
+import NetInfo from "@react-native-community/netinfo"
 
 export default function Stop() {
-  const [gameData, setGameData] = useState<GameModel | null>(null)
+  const [gameData, setGameData] = useState<StopModel | null>(null)
   const [points, setPoints] = useState<number>(0)
   const [title, setTitle] = useState<string | null>(null)
   const [countdown, setCountdown] = useState<number | string>(3)
@@ -54,6 +58,7 @@ export default function Stop() {
   const [restartModalVisible, setRestartModalVisible] = useState<boolean>(false)
   const [ready, setReady] = useState<boolean>(false)
   const [isStarting, setIsStarting] = useState(false)
+  const [connection, setConnection] = useState<boolean>(true)
   const [inputs, setInputs] = useState({
     name: "",
     country: "",
@@ -95,8 +100,9 @@ export default function Stop() {
     let gameId = id
     let gameTime = +time
     let unsubscribe: (() => void) | undefined
+    let connectionUnsubscribe: (() => void) | undefined
     let backHandler: NativeEventSubscription
-    let currentGameData: GameModel
+    let currentGameData: StopModel
     console.log(mode, id, gameTime)
     setTimeLeft(gameTime)
 
@@ -114,6 +120,7 @@ export default function Stop() {
             id: getAuth().currentUser?.uid,
             name: getAuth().currentUser?.displayName,
             points: 0,
+            photoURL: getAuth().currentUser?.photoURL!,
           },
         ],
         host: getAuth().currentUser?.uid || "no-host",
@@ -168,9 +175,9 @@ export default function Stop() {
         return
       }
 
-      currentGameData = data
+      currentGameData = data as StopModel
       setGameData(currentGameData)
-      setTitleByGameStatus(currentGameData.gameStatus)
+      setTitleByGameStatus(connection ? currentGameData.gameStatus : 3)
 
       if (
         currentGameData.gameStatus === GameStatus.IN_PROGRESS &&
@@ -178,7 +185,7 @@ export default function Stop() {
       ) {
         countdownStarted.current = true
         handleCountdownSync(currentGameData)
-        setTimeLeft(data.currentTime)
+        setTimeLeft(currentGameData.currentTime)
       }
 
       if (currentGameData.gameStatus === GameStatus.STOPPED) {
@@ -194,12 +201,21 @@ export default function Stop() {
       backHandler = BackHandler.addEventListener("hardwareBackPress", backPress)
     })
 
+    connectionUnsubscribe = NetInfo.addEventListener((state) => {
+      setConnection(state.isConnected ?? false)
+    })
+
     return () => {
       console.log("Cleaning up...")
 
       if (unsubscribe) {
         unsubscribe()
         unsubscribe = undefined
+      }
+
+      if (connectionUnsubscribe) {
+        connectionUnsubscribe()
+        connectionUnsubscribe = undefined
       }
 
       if (backHandler) backHandler.remove()
@@ -234,6 +250,9 @@ export default function Stop() {
         break
       case GameStatus.STOPPED:
         setTitle("STOP!")
+        break
+      case 3:
+        setTitle(t("connection_lost"))
         break
     }
   }
@@ -302,7 +321,7 @@ export default function Stop() {
     }
   }
 
-  const handleCountdownSync = (data: GameModel) => {
+  const handleCountdownSync = (data: StopModel) => {
     let counter = 3
 
     vibrationEnabled && Vibration.vibrate(30)
@@ -329,7 +348,7 @@ export default function Stop() {
     }, 1000)
   }
 
-  const handleTimer = (data: GameModel) => {
+  const handleTimer = (data: StopModel) => {
     let time = data.currentTime + 3
     const elapsed = Math.floor((Date.now() - data.startTime) / 1000)
 
@@ -384,7 +403,7 @@ export default function Stop() {
     })
   }
 
-  const handleBackPress = (data?: GameModel | null): boolean => {
+  const handleBackPress = (data?: StopModel | null): boolean => {
     const currentData = data ?? gameData
 
     if (mode === "offline") handleOnExit()
@@ -400,7 +419,7 @@ export default function Stop() {
     }
 
     mode === "online" && setCloseModalVisible(true)
-    mode === "join" && handleOnExit()
+    mode === "join" && setCloseModalVisible(true)
     return true
   }
 
@@ -435,8 +454,50 @@ export default function Stop() {
     navigation.goBack()
   }
 
+  const handlePlayers = () => {
+    if (mode === "offline") return
+    if (!connection) return
+
+    sheetRef.current?.expand()
+  }
+
   return (
     <Screen>
+      {!connection && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: Theme.colors.backdrop,
+            zIndex: 10,
+            gap: 16,
+          }}
+        >
+          <OfflineIcon size={64} color={Theme.colors.accent} />
+
+          <Text
+            style={{
+              color: Theme.colors.accent,
+              fontFamily: "OnestBold",
+              fontSize: 24,
+            }}
+          >
+            {t("you_are_offline")}
+          </Text>
+
+          <ActivityIndicator
+            size="large"
+            color={Theme.colors.accent}
+            style={{ width: 38, height: 38, alignSelf: "center" }}
+          />
+        </View>
+      )}
+
       <Stack.Screen
         options={{
           headerTintColor: Theme.colors.text,
@@ -451,7 +512,7 @@ export default function Stop() {
           ),
           headerRight: () => (
             <CurrentPlayers
-              onPress={() => mode !== "offline" && sheetRef.current?.expand()}
+              onPress={handlePlayers}
               players={gameData?.players.length}
             />
           ),
@@ -470,7 +531,9 @@ export default function Stop() {
 
       <CustomModal
         title={t("close_room")}
-        description={t("close_room_desc")}
+        description={
+          mode !== "join" ? t("close_room_desc") : t("close_room_join_desc")
+        }
         modalVisible={closeModalVisible}
         onRequestClose={() => {
           setCloseModalVisible(!closeModalVisible)
@@ -819,9 +882,34 @@ export default function Stop() {
                     borderRadius: 14,
                     backgroundColor: Theme.colors.background2,
                     justifyContent: "space-between",
+                    alignItems: "center",
                     flexDirection: "row",
                   }}
                 >
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: Theme.colors.primary2,
+                      borderRadius: "100%",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {!player.photoURL || player.photoURL === "" ? (
+                      <UserIcon size={32} color={Theme.colors.accent} />
+                    ) : (
+                      <Image
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        source={{ uri: player.photoURL }}
+                      />
+                    )}
+                  </View>
                   <Text
                     style={{
                       color: Theme.colors.gray,
@@ -892,7 +980,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: Theme.colors.background,
+    backgroundColor: Theme.colors.modal,
     borderRadius: 20,
     padding: 20,
     shadowColor: "#000",
