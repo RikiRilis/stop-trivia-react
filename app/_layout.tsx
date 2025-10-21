@@ -9,7 +9,7 @@ import { useFonts } from "expo-font"
 import { CogIcon } from "@/components/ui/Icons"
 import { Theme } from "@/constants/Theme"
 import SplashScreen from "@/components/ui/SplashScreen"
-import { auth } from "@/libs/firebaseConfig"
+import { auth } from "@/db/firebaseConfig"
 import { LoginForm } from "@/components/LoginForm"
 import {
   FirebaseAuthTypes,
