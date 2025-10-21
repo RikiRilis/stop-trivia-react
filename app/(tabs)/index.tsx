@@ -1,5 +1,5 @@
 import { Theme } from "@/constants/Theme"
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Modal,
   TouchableWithoutFeedback,
+  ToastAndroid,
 } from "react-native"
 import { LinkIcon, OfflineIcon, OnlineIcon } from "@/components/ui/Icons"
 import { Screen } from "@/components/ui/Screen"
@@ -21,8 +22,9 @@ import ic from "@/assets/lotties/ic_gamepad.json"
 import { ModesButton } from "@/components/ModesButton"
 import { FocusInput } from "@/components/FocusInput"
 import Fire from "@/db/Fire"
-import { GameStatus } from "@/interfaces/Game"
+import { GameStatus, StopModel } from "@/interfaces/Game"
 import { useTranslation } from "react-i18next"
+import NetInfo from "@react-native-community/netinfo"
 
 export default function Index() {
   const [vibrationEnabled, setVibrationEnabled] = useState(true)
@@ -31,6 +33,7 @@ export default function Index() {
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [onlineLoading, setOnlineLoading] = useState(false)
+  const [connection, setConnection] = useState(true)
 
   const { navigate } = useRouter()
   const { getItem } = useStorage()
@@ -46,6 +49,14 @@ export default function Index() {
     }, [])
   )
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setConnection(state.isConnected ?? false)
+    })
+
+    return unsubscribe()
+  }, [])
+
   const handleCodeChange = (text: string) => {
     setError(null)
     setId(text.trim().toLocaleLowerCase())
@@ -58,6 +69,15 @@ export default function Index() {
     setError(null)
 
     if (flag === "join") {
+      if (!connection) {
+        ToastAndroid.showWithGravity(
+          t("you_are_offline"),
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        )
+        return
+      }
+
       setLoading(true)
 
       if (id.length !== 6) {
@@ -69,22 +89,24 @@ export default function Index() {
 
       id.length === 6 &&
         Fire.getGame("stop", id).then((game) => {
-          if (!game) {
+          let gameGot: StopModel = game as StopModel
+
+          if (!gameGot) {
             vibrationEnabled && Vibration.vibrate(100)
             setError(t("error_game_not_found"))
             setLoading(false)
             return
           }
 
-          if (game.players.length >= 4) {
+          if (gameGot.players.length >= 4) {
             vibrationEnabled && Vibration.vibrate(100)
             setError(t("error_game_full"))
             setLoading(false)
             return
           }
 
-          if (game) {
-            if (game.gameStatus === GameStatus.IN_PROGRESS) {
+          if (gameGot) {
+            if (gameGot.gameStatus === GameStatus.IN_PROGRESS) {
               vibrationEnabled && Vibration.vibrate(100)
               setError(t("error_game_started"))
               setLoading(false)
@@ -97,7 +119,11 @@ export default function Index() {
 
             navigate({
               pathname: "stop",
-              params: { mode: flag, id: game.gameId, time: game.currentTime },
+              params: {
+                mode: flag,
+                id: gameGot.gameId,
+                time: gameGot.currentTime,
+              },
             })
           }
         })
@@ -115,6 +141,15 @@ export default function Index() {
     }
 
     if (flag === "online") {
+      if (!connection) {
+        ToastAndroid.showWithGravity(
+          t("you_are_offline"),
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        )
+        return
+      }
+
       if (onlineLoading) return
 
       setOnlineLoading(true)
@@ -336,7 +371,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: Theme.colors.background,
+    backgroundColor: Theme.colors.modal,
     borderRadius: 20,
     padding: 20,
     shadowColor: "#000",

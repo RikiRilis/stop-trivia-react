@@ -11,7 +11,7 @@ import {
 import { Theme } from "@/constants/Theme"
 import { VerifiedIcon } from "./ui/Icons"
 import { useTranslation } from "react-i18next"
-import { auth } from "@/libs/firebaseConfig"
+import { auth } from "@/db/firebaseConfig"
 import { sendEmailVerification, signOut } from "@react-native-firebase/auth"
 import { router } from "expo-router"
 
@@ -110,7 +110,10 @@ export const WaitingVerification = () => {
           accessibilityLabel="Sign in"
         >
           {loading ? (
-            <ActivityIndicator color={Theme.colors.text} />
+            <ActivityIndicator
+              color={Theme.colors.text}
+              style={{ width: 32, height: 32 }}
+            />
           ) : (
             <Text style={styles.submitText}>
               {t("resend_email_verification")}

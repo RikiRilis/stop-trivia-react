@@ -41,7 +41,7 @@ import {
   updateProfile,
 } from "@react-native-firebase/auth"
 import * as Google from "expo-auth-session/providers/google"
-import { auth } from "@/libs/firebaseConfig"
+import { auth } from "@/db/firebaseConfig"
 import { useTranslation } from "react-i18next"
 
 export const LoginForm = () => {
