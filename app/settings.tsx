@@ -9,9 +9,10 @@ import {
   UserIcon,
   VibrationIcon,
   WebIcon,
+  EditIcon,
+  GithubIcon,
 } from "@/components/ui/Icons"
 import { Theme } from "@/constants/Theme"
-import { PlatformPressable } from "@react-navigation/elements"
 import { Stack, useNavigation } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import {
@@ -212,7 +213,7 @@ export default function Settings() {
           headerTitle: t("settings"),
           headerTitleStyle: {
             fontSize: 24,
-            fontFamily: "Onest",
+            fontFamily: Theme.fonts.onest,
           },
           headerLeft: () => (
             <BackIcon size={34} onPress={() => navigation.goBack()} />
@@ -238,40 +239,64 @@ export default function Settings() {
             paddingBottom: 22,
           }}
         >
-          <Pressable
-            onPress={handlePickImage}
+          <View
             style={{
-              width: auth.currentUser?.photoURL ? 96 : 64,
-              height: auth.currentUser?.photoURL ? 96 : 64,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: Theme.colors.primary2,
-              padding: auth.currentUser?.photoURL ? 0 : 12,
-              borderRadius: "100%",
-              marginBottom: 4,
-              overflow: "hidden",
+              position: "relative",
             }}
           >
-            {auth.currentUser?.photoURL ? (
-              <Image
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  resizeMode: "contain",
-                  borderRadius: 6,
-                  alignSelf: "center",
-                }}
-                source={{ uri: auth.currentUser?.photoURL }}
-              />
-            ) : (
-              <UserIcon size={64} color={Theme.colors.accent} />
-            )}
-          </Pressable>
+            <Pressable
+              onPress={handlePickImage}
+              style={{
+                width: auth.currentUser?.photoURL ? 96 : 64,
+                height: auth.currentUser?.photoURL ? 96 : 64,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: Theme.colors.primary2,
+                padding: auth.currentUser?.photoURL ? 0 : 12,
+                borderRadius: 100,
+                marginBottom: 4,
+                overflow: "hidden",
+              }}
+            >
+              {auth.currentUser?.photoURL ? (
+                <Image
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    resizeMode: "cover",
+                    borderRadius: 100,
+                    alignSelf: "center",
+                  }}
+                  source={{ uri: auth.currentUser?.photoURL }}
+                />
+              ) : (
+                <UserIcon size={64} color={Theme.colors.accent} />
+              )}
+            </Pressable>
+
+            <Pressable
+              onPress={handlePickImage}
+              style={({ pressed }) => [
+                { opacity: pressed ? 0.6 : 1 },
+                {
+                  position: "absolute",
+                  bottom: 4,
+                  right: 4,
+                  backgroundColor: Theme.colors.accent,
+                  borderRadius: 100,
+                  padding: 6,
+                  elevation: 3,
+                },
+              ]}
+            >
+              <EditIcon color={Theme.colors.text} size={14} />
+            </Pressable>
+          </View>
 
           <Text
             style={{
               color: Theme.colors.accent,
-              fontFamily: "OnestBold",
+              fontFamily: Theme.fonts.onestBold,
               fontSize: 24,
             }}
           >
@@ -281,7 +306,7 @@ export default function Settings() {
           <Text
             style={{
               color: Theme.colors.gray,
-              fontFamily: "Onest",
+              fontFamily: Theme.fonts.onest,
               fontSize: 12,
             }}
           >
@@ -299,14 +324,17 @@ export default function Settings() {
             <Text
               style={{
                 color: Theme.colors.darkGray,
-                fontFamily: "Onest",
+                fontFamily: Theme.fonts.onest,
                 fontSize: 12,
               }}
             >
               {userId}
             </Text>
 
-            <Pressable onPress={copyUserId}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+              onPress={copyUserId}
+            >
               <CopyIcon color={Theme.colors.darkGray} size={12} />
             </Pressable>
           </View>
@@ -314,14 +342,20 @@ export default function Settings() {
 
         <Divider />
 
-        <PlatformPressable
-          style={{
-            flexDirection: "row",
-            gap: 12,
-            alignItems: "center",
-            paddingVertical: 16,
-            padding: 16,
-          }}
+        <Pressable
+          style={({ pressed }) => [
+            {
+              backgroundColor: pressed
+                ? Theme.colors.background2
+                : Theme.colors.transparent,
+              opacity: pressed ? 0.6 : 1,
+              flexDirection: "row",
+              gap: 12,
+              alignItems: "center",
+              paddingVertical: 16,
+              padding: 16,
+            },
+          ]}
           onPress={toggleVibrationSwitch}
         >
           <View>
@@ -349,7 +383,7 @@ export default function Settings() {
               value={isVibrationEnabled}
             />
           </View>
-        </PlatformPressable>
+        </Pressable>
 
         <Divider />
 
@@ -374,6 +408,15 @@ export default function Settings() {
           title={t("terms_conditions")}
           description={t("terms_conditions_desc")}
           icon={<ListIcon color={Theme.colors.gray} />}
+        />
+
+        <SettingsButton
+          onPress={() =>
+            Linking.openURL("https://github.com/RikiRilis/stop-trivia-react")
+          }
+          title="Github"
+          description={t("github_desc")}
+          icon={<GithubIcon color={Theme.colors.gray} />}
         />
 
         <SettingsButton
@@ -402,7 +445,10 @@ export default function Settings() {
             return (
               <Pressable
                 key={option}
-                style={styles.optionContainer}
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.6 : 1 },
+                  styles.optionContainer,
+                ]}
                 onPress={() => toggleLanguage(option)}
               >
                 <View
