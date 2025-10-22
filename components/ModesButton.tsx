@@ -41,7 +41,7 @@ export const ModesButton = ({
           style={{
             color: Theme.colors.text,
             fontSize: 20,
-            fontFamily: "OnestBold",
+            fontFamily: Theme.fonts.onestBold,
           }}
         >
           {title}
@@ -51,7 +51,7 @@ export const ModesButton = ({
             style={{
               color: Theme.colors.gray,
               fontSize: 14,
-              fontFamily: "Onest",
+              fontFamily: Theme.fonts.onest,
             }}
           >
             {subtitle}
