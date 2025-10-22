@@ -103,7 +103,7 @@ export default function Layout() {
                 headerRight: () => (
                   <Link asChild href="/settings">
                     <Pressable>
-                      <CogIcon />
+                      <CogIcon color={Theme.colors.text} />
                     </Pressable>
                   </Link>
                 ),
