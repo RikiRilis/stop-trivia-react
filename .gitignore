@@ -43,3 +43,6 @@ yarn-error.*
 # Service files
 google-services.json
 GoogleService-Info.plist
+
+# DB config file
+/db
