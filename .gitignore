@@ -45,4 +45,4 @@ google-services.json
 GoogleService-Info.plist
 
 # DB config file
-/db
+/db/firebaseConfig.ts
