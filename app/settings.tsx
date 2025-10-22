@@ -1,3 +1,4 @@
+import pkg from "../app.config.js"
 import { SettingsButton } from "@/components/SettingsButton"
 import {
   BackIcon,
@@ -11,6 +12,9 @@ import {
   WebIcon,
   EditIcon,
   GithubIcon,
+  ShareIcon,
+  QuestionIcon,
+  StarIcon,
 } from "@/components/ui/Icons"
 import { Theme } from "@/constants/Theme"
 import { Stack, useNavigation } from "expo-router"
@@ -26,6 +30,7 @@ import {
   ToastAndroid,
   Vibration,
   View,
+  Share,
 } from "react-native"
 import { Divider } from "../components/Divider"
 import { useStorage } from "@/hooks/useStorage"
@@ -39,6 +44,7 @@ import { useTranslation } from "react-i18next"
 import { Updaloading } from "@/components/Uploading"
 import * as ImagePicker from "expo-image-picker"
 import NetInfo from "@react-native-community/netinfo"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import {
   ref,
   uploadBytesResumable,
@@ -46,6 +52,7 @@ import {
 } from "@react-native-firebase/storage"
 
 const languageCodes = ["en", "es"]
+const appVersion = pkg.expo.android.version
 
 export default function Settings() {
   const [isVibrationEnabled, setIsVibrationEnabled] = useState(false)
@@ -70,6 +77,7 @@ export default function Settings() {
 
   const sheetRef = useRef<BottomSheet>(null)
   const navigation = useNavigation()
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -199,12 +207,33 @@ export default function Settings() {
     setUploading(false)
   }
 
+  const handleShareApp = async () => {
+    try {
+      const result = await Share.share({
+        message: `${t("sharing_text")} https://play.google.com/store/apps/details?id=com.rilisentertainment.stoptriviaonline`,
+      })
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // Shared with activity type of result.activityType
+        } else {
+          // Shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // Dismissed
+      }
+    } catch (error: any) {
+      console.log("Error sharing:", error.message)
+    }
+  }
+
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: Theme.colors.background,
         width: "100%",
+        paddingBottom: insets.bottom,
       }}
     >
       <Stack.Screen
@@ -385,8 +414,6 @@ export default function Settings() {
           </View>
         </Pressable>
 
-        <Divider />
-
         <SettingsButton
           onPress={() => sheetRef.current?.expand()}
           title={t("language")}
@@ -397,16 +424,41 @@ export default function Settings() {
         <Divider />
 
         <SettingsButton
+          onPress={handleShareApp}
+          title={t("invite_friends")}
+          description={t("invite_friends_desc")}
+          icon={<ShareIcon color={Theme.colors.gray} />}
+        />
+
+        <SettingsButton
+          onPress={() =>
+            Linking.openURL(
+              "https://play.google.com/store/apps/details?id=com.rilisentertainment.stoptriviaonline"
+            )
+          }
+          title={t("rate_game")}
+          description={t("rate_game_desc")}
+          icon={<StarIcon color={Theme.colors.gray} />}
+        />
+
+        <SettingsButton
+          onPress={() => Linking.openURL("https://rikirilis.com")}
+          title={t("site")}
+          description={t("site_desc")}
+          icon={<WebIcon color={Theme.colors.gray} />}
+        />
+
+        <Divider />
+
+        <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/privacy")}
           title={t("privacy_policy")}
-          description={t("privacy_policy_desc")}
           icon={<PrivacyIcon color={Theme.colors.gray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/terms")}
           title={t("terms_conditions")}
-          description={t("terms_conditions_desc")}
           icon={<ListIcon color={Theme.colors.gray} />}
         />
 
@@ -415,15 +467,13 @@ export default function Settings() {
             Linking.openURL("https://github.com/RikiRilis/stop-trivia-react")
           }
           title="Github"
-          description={t("github_desc")}
           icon={<GithubIcon color={Theme.colors.gray} />}
         />
 
         <SettingsButton
-          onPress={() => Linking.openURL("https://rikirilis.com")}
-          title={t("site")}
-          description={t("site_desc")}
-          icon={<WebIcon color={Theme.colors.gray} />}
+          onPress={() => Linking.openURL("https://www.rikirilis.com/#contact")}
+          title="Feedback"
+          icon={<QuestionIcon color={Theme.colors.gray} />}
         />
 
         <Divider />
@@ -436,6 +486,32 @@ export default function Settings() {
             color={Theme.colors.red}
           />
         )}
+
+        <View style={{ marginVertical: 8, flexDirection: "column" }}>
+          <Text
+            style={{
+              textAlign: "center",
+              width: "100%",
+              color: Theme.colors.darkGray,
+              fontFamily: Theme.fonts.onest,
+              fontSize: 14,
+            }}
+          >
+            Stop Trivia
+          </Text>
+
+          <Text
+            style={{
+              textAlign: "center",
+              width: "100%",
+              color: Theme.colors.darkGray,
+              fontFamily: Theme.fonts.onest,
+              fontSize: 12,
+            }}
+          >
+            {appVersion}
+          </Text>
+        </View>
       </ScrollView>
 
       <BottomSheetModal title={t("language")} ref={sheetRef}>

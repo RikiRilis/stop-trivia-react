@@ -78,6 +78,22 @@ export const HashIcon = (props: any) => (
   />
 )
 
+export const StarIcon = (props: any) => (
+  <Octicons name="star" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const QuestionIcon = (props: any) => (
+  <Octicons name="question" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const ShareIcon = (props: any) => (
+  <Octicons name="share" color={Theme.colors.text} size={24} {...props} />
+)
+
+export const InfoIcon = (props: any) => (
+  <Octicons name="info" color={Theme.colors.text} size={24} {...props} />
+)
+
 export const EditIcon = (props: any) => (
   <Octicons name="pencil" color={Theme.colors.text} size={24} {...props} />
 )
@@ -133,15 +149,6 @@ export const ForwardIcon = (props: any) => (
 
 export const CogIcon = (props: any) => (
   <FontAwesome name="cog" size={24} color={Theme.colors.text} {...props} />
-)
-
-export const InfoIcon = (props: any) => (
-  <FontAwesome
-    name="info-circle"
-    size={24}
-    color={Theme.colors.text}
-    {...props}
-  />
 )
 
 export const HomeIcon = (props: any) => (
