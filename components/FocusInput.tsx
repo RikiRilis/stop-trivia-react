@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 14,
     color: Theme.colors.text,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
     fontSize: 16,
   },
 })

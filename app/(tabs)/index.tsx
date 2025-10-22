@@ -194,7 +194,7 @@ export default function Index() {
                 <Text
                   style={{
                     color: Theme.colors.accent,
-                    fontFamily: "OnestBold",
+                    fontFamily: Theme.fonts.onestBold,
                     fontSize: 18,
                     alignSelf: "center",
                     marginBottom: 16,
@@ -264,7 +264,7 @@ export default function Index() {
             style={{
               color: Theme.colors.text,
               fontSize: 18,
-              fontFamily: "Onest",
+              fontFamily: Theme.fonts.onest,
             }}
           >
             {t("choose_your_mode")}
@@ -338,7 +338,7 @@ export default function Index() {
               <Text
                 style={{
                   color: Theme.colors.red,
-                  fontFamily: "Onest",
+                  fontFamily: Theme.fonts.onest,
                   fontSize: 14,
                 }}
               >
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   texts: {
     color: Theme.colors.lightGray,
     alignSelf: "flex-start",
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   modalView: {
     margin: 20,

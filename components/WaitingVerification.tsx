@@ -154,13 +154,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
     color: Theme.colors.text,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
     color: Theme.colors.gray,
     textAlign: "center",
     lineHeight: 22,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 14,
     color: Theme.colors.gray,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   submit: {
     backgroundColor: Theme.colors.primary,
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   submitText: {
     color: Theme.colors.text,
     fontSize: 16,
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   signout: {
     backgroundColor: Theme.colors.red,

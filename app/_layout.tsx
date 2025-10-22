@@ -92,7 +92,7 @@ export default function Layout() {
                 headerTitle: "Stop Trivia",
                 headerTitleStyle: {
                   fontSize: 24,
-                  fontFamily: "OnestBold",
+                  fontFamily: Theme.fonts.onestBold,
                 },
                 headerLeft: () => (
                   <Image

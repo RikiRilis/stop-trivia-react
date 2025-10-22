@@ -34,7 +34,7 @@ export const Updaloading = ({
           <Text
             style={{
               color: Theme.colors.gray,
-              fontFamily: "OnestBold",
+              fontFamily: Theme.fonts.onestBold,
               fontSize: 18,
               alignSelf: "center",
               marginBottom: 16,
@@ -77,7 +77,12 @@ export const Updaloading = ({
                   styles.modalBottomButtons,
                 ]}
               >
-                <Text style={{ fontFamily: "Onest", color: Theme.colors.red }}>
+                <Text
+                  style={{
+                    fontFamily: Theme.fonts.onest,
+                    color: Theme.colors.red,
+                  }}
+                >
                   {t("cancel")}
                 </Text>
               </Pressable>
@@ -94,7 +99,10 @@ export const Updaloading = ({
                 ]}
               >
                 <Text
-                  style={{ fontFamily: "Onest", color: Theme.colors.accent }}
+                  style={{
+                    fontFamily: Theme.fonts.onest,
+                    color: Theme.colors.accent,
+                  }}
                 >
                   {t("accept")}
                 </Text>

@@ -18,4 +18,8 @@ export const Theme = {
     transparent: "#00000000",
     backdrop: "#00000086",
   },
+  fonts: {
+    onest: "Onest",
+    onestBold: "OnestBold",
+  },
 }

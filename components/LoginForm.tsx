@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
     fontSize: 42,
     color: Theme.colors.text,
     marginStart: -5,
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: Theme.colors.text,
     fontSize: 16,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   row: {
     flexDirection: "row",
@@ -496,12 +496,12 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     color: Theme.colors.primary,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   error: {
     color: Theme.colors.red,
     marginBottom: 8,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   submit: {
     backgroundColor: Theme.colors.primary,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   submitText: {
     color: Theme.colors.text,
     fontSize: 16,
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   orRow: {
     flexDirection: "row",
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   orText: {
     marginHorizontal: 8,
     color: Theme.colors.darkGray,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   socialRow: {
     flexDirection: "row",
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   },
   socialText: {
     color: Theme.colors.text,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   footer: {
     flexDirection: "row",
@@ -561,16 +561,16 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: Theme.colors.gray,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
   },
   footerPolicy: {
     color: Theme.colors.darkGray,
-    fontFamily: "Onest",
+    fontFamily: Theme.fonts.onest,
     marginVertical: 8,
   },
   signupText: {
     color: Theme.colors.primary,
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   googleBtn: {
     flexDirection: "row",
@@ -585,6 +585,6 @@ const styles = StyleSheet.create({
   googleText: {
     color: Theme.colors.text,
     fontSize: 16,
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
 })

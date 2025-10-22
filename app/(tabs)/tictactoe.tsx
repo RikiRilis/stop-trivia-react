@@ -9,7 +9,7 @@ export default function TicTacToe() {
         <Text
           style={{
             color: Theme.colors.gray,
-            fontFamily: "OnestBold",
+            fontFamily: Theme.fonts.onestBold,
             fontSize: 32,
           }}
         >

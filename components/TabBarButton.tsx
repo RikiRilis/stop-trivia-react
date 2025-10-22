@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated"
+import { Theme } from "@/constants/Theme"
 
 interface Props {
   onPress: () => void
@@ -68,7 +69,7 @@ export const TabBarButton = ({
             color: color,
             textAlign: "center",
             fontSize: 12,
-            fontFamily: "Onest",
+            fontFamily: Theme.fonts.onest,
           },
           animatedTextStyle,
         ]}

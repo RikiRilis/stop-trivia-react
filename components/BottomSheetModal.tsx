@@ -58,7 +58,7 @@ export const BottomSheetModal = forwardRef<BottomSheet, Props>(
             <Text
               style={{
                 color: Theme.colors.text,
-                fontFamily: "OnestBold",
+                fontFamily: Theme.fonts.onestBold,
                 fontSize: 18,
               }}
             >

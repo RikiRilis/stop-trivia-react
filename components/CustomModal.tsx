@@ -33,7 +33,7 @@ export const CustomModal = ({
             <Text
               style={{
                 color: Theme.colors.accent,
-                fontFamily: "OnestBold",
+                fontFamily: Theme.fonts.onestBold,
                 fontSize: 18,
               }}
             >
@@ -42,7 +42,12 @@ export const CustomModal = ({
           </View>
 
           <View style={{ marginVertical: 12 }}>
-            <Text style={{ fontFamily: "Onest", color: Theme.colors.gray }}>
+            <Text
+              style={{
+                fontFamily: Theme.fonts.onest,
+                color: Theme.colors.gray,
+              }}
+            >
               {description}
             </Text>
           </View>
@@ -61,7 +66,12 @@ export const CustomModal = ({
                 styles.modalBottomButtons,
               ]}
             >
-              <Text style={{ fontFamily: "Onest", color: Theme.colors.red }}>
+              <Text
+                style={{
+                  fontFamily: Theme.fonts.onest,
+                  color: Theme.colors.red,
+                }}
+              >
                 {t("cancel")}
               </Text>
             </Pressable>
@@ -77,7 +87,12 @@ export const CustomModal = ({
                 styles.modalBottomButtons,
               ]}
             >
-              <Text style={{ fontFamily: "Onest", color: Theme.colors.accent }}>
+              <Text
+                style={{
+                  fontFamily: Theme.fonts.onest,
+                  color: Theme.colors.accent,
+                }}
+              >
                 {t("accept")}
               </Text>
             </Pressable>
@@ -103,7 +118,7 @@ const styles = StyleSheet.create({
   texts: {
     color: Theme.colors.lightGray,
     alignSelf: "flex-start",
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   modalView: {
     margin: 20,
