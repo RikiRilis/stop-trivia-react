@@ -11,6 +11,7 @@ import {
   BackHandler,
   NativeEventSubscription,
   ActivityIndicator,
+  Animated,
 } from "react-native"
 import {
   Stack,
@@ -45,6 +46,8 @@ import BottomSheet from "@gorhom/bottom-sheet"
 import { CustomModal } from "@/components/CustomModal"
 import Clipboard from "@react-native-clipboard/clipboard"
 import NetInfo from "@react-native-community/netinfo"
+import { Player } from "@/interfaces/Player"
+import { PlayerInputsInfoModal } from "@/components/PlayerInputsInfoModal"
 
 export default function Stop() {
   const [gameData, setGameData] = useState<StopModel | null>(null)
@@ -59,19 +62,23 @@ export default function Stop() {
   const [ready, setReady] = useState<boolean>(false)
   const [isStarting, setIsStarting] = useState(false)
   const [connection, setConnection] = useState<boolean>(true)
+  const [timerColor, setTimerColor] = useState(Theme.colors.gray)
+  const [inputsPlayer, setInputsPlayer] = useState<Player | null>(null)
+  const [inputsModalVisible, setInputsModalVisible] = useState(false)
   const [inputs, setInputs] = useState({
     name: "",
-    country: "",
-    animal: "",
-    food: "",
-    object: "",
     lastName: "",
+    country: "",
     color: "",
+    animal: "",
     artist: "",
+    food: "",
     fruit: "",
+    object: "",
     profession: "",
   })
 
+  const scaleAnim = useRef(new Animated.Value(1)).current
   const sheetRef = useRef<BottomSheet>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const countdownStarted = useRef(false)
@@ -121,6 +128,7 @@ export default function Stop() {
             name: getAuth().currentUser?.displayName,
             points: 0,
             photoURL: getAuth().currentUser?.photoURL!,
+            inputs,
           },
         ],
         host: getAuth().currentUser?.uid || "no-host",
@@ -186,12 +194,14 @@ export default function Stop() {
         countdownStarted.current = true
         handleCountdownSync(currentGameData)
         setTimeLeft(currentGameData.currentTime)
+        setTimerColor(Theme.colors.gray)
+        scaleAnim.stopAnimation()
       }
 
       if (currentGameData.gameStatus === GameStatus.STOPPED) {
         countdownStarted.current = false
         setCountdown(3)
-        stopTimer()
+        stopTimer(currentGameData)
       }
 
       const backPress = (): boolean => {
@@ -218,6 +228,7 @@ export default function Stop() {
         connectionUnsubscribe = undefined
       }
 
+      if (timerRef.current) clearInterval(timerRef.current)
       if (backHandler) backHandler.remove()
 
       if (mode === "online" && gameId) {
@@ -258,11 +269,10 @@ export default function Stop() {
   }
 
   const handlePress = async (flag: string) => {
-    if (!gameData) return
-
     const userId = getAuth().currentUser?.uid
 
     if (flag === "play") {
+      if (!gameData) return
       if (gameData.host === userId) {
         if (gameData.players.length < 2) {
           vibrationEnabled && Vibration.vibrate(100)
@@ -299,7 +309,8 @@ export default function Stop() {
     }
 
     if (flag === "stop") {
-      stopTimer()
+      if (!gameData) return
+      stopTimer(gameData)
       Fire.updateGame("stop", gameData.gameId, {
         gameStatus: GameStatus.STOPPED,
         playersReady: 1,
@@ -308,6 +319,7 @@ export default function Stop() {
     }
 
     if (flag === "ready") {
+      if (!gameData) return
       Fire.updateGame("stop", gameData.gameId, {
         playersReady: gameData.playersReady + 1,
       })
@@ -316,7 +328,6 @@ export default function Stop() {
     }
 
     if (flag === "restart") {
-      if (mode === "offline") handleRestartInputs()
       setRestartModalVisible(true)
     }
   }
@@ -325,7 +336,7 @@ export default function Stop() {
     let counter = 3
 
     vibrationEnabled && Vibration.vibrate(30)
-    stopTimer()
+    if (timerRef.current) stopTimer(data)
     setCountdown(3)
     setIsStarting(true)
     handleRestartInputs()
@@ -339,7 +350,7 @@ export default function Stop() {
       counter--
       setCountdown(counter)
       if (counter === 0) {
-        stopTimer()
+        stopTimer(data)
         setCountdown(data.currentLetter)
         setLetter(data.currentLetter)
         handleTimer(data)
@@ -349,17 +360,25 @@ export default function Stop() {
   }
 
   const handleTimer = (data: StopModel) => {
-    let time = data.currentTime + 3
-    const elapsed = Math.floor((Date.now() - data.startTime) / 1000)
+    let currentTime = data.currentTime
+    let timeElapsed = Math.floor((Date.now() - data.startTime) / 1000)
+    let time = currentTime - timeElapsed
 
     timerRef.current = setInterval(() => {
       time--
-      setTimeLeft(time - elapsed)
+      setTimeLeft(time)
 
-      if (time <= 3) vibrationEnabled && Vibration.vibrate(10)
+      if (time === 3) {
+        setTimerColor(Theme.colors.red)
+        startFastPulse()
+      }
+
+      if (time <= 3) {
+        vibrationEnabled && Vibration.vibrate(50)
+      }
 
       if (time === 0) {
-        stopTimer()
+        stopTimer(data)
         vibrationEnabled && Vibration.vibrate(1000)
         Fire.updateGame("stop", data.gameId, {
           gameStatus: GameStatus.STOPPED,
@@ -369,8 +388,23 @@ export default function Stop() {
     }, 1000)
   }
 
-  const stopTimer = () => {
+  const stopTimer = (currentGameData: StopModel) => {
     if (timerRef.current) {
+      const userId = getAuth().currentUser?.uid
+      const updatedPlayers = currentGameData.players.map((player) => {
+        if (player.id === userId) {
+          return {
+            ...player,
+            inputs: inputs,
+          }
+        }
+        return player
+      })
+
+      Fire.updateGame("stop", currentGameData.gameId, {
+        players: updatedPlayers,
+      })
+
       setReady(false)
       clearInterval(timerRef.current)
       timerRef.current = null
@@ -457,8 +491,37 @@ export default function Stop() {
   const handlePlayers = () => {
     if (mode === "offline") return
     if (!connection) return
+    if (gameData?.gameStatus === GameStatus.IN_PROGRESS) return
 
     sheetRef.current?.expand()
+  }
+
+  const startFastPulse = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start()
+  }
+
+  const handlePlayerInputsModal = (player: Player) => {
+    if (mode === "offline") return
+    if (!connection) return
+    if (gameData?.gameStatus === GameStatus.IN_PROGRESS) return
+    if (gameData?.gameStatus === GameStatus.CREATED) return
+    if (player.id === getAuth().currentUser?.uid) return
+
+    setInputsPlayer(player)
+    setInputsModalVisible(true)
   }
 
   return (
@@ -483,7 +546,7 @@ export default function Stop() {
           <Text
             style={{
               color: Theme.colors.accent,
-              fontFamily: "OnestBold",
+              fontFamily: Theme.fonts.onestBold,
               fontSize: 24,
             }}
           >
@@ -504,7 +567,7 @@ export default function Stop() {
           headerTitle: title ?? "Stop Trivia",
           headerTitleStyle: {
             fontSize: 24,
-            fontFamily: "OnestBold",
+            fontFamily: Theme.fonts.onestBold,
           },
           headerTitleAlign: "center",
           headerLeft: () => (
@@ -541,6 +604,12 @@ export default function Stop() {
         onAccept={handleOnExit}
       />
 
+      <PlayerInputsInfoModal
+        modalVisible={inputsModalVisible}
+        onRequestClose={() => setInputsModalVisible(false)}
+        player={inputsPlayer}
+      />
+
       <Pressable style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
         <View style={{ flex: 1, width: "100%" }}>
           {mode !== "offline" && (
@@ -553,15 +622,16 @@ export default function Stop() {
                 paddingVertical: 24,
               }}
             >
-              <Text
+              <Animated.Text
                 style={{
-                  color: Theme.colors.gray,
-                  fontFamily: "Onest",
+                  color: timerColor,
+                  fontFamily: Theme.fonts.onest,
                   fontSize: 18,
+                  transform: [{ scale: scaleAnim }],
                 }}
               >
                 {t("time_left")}: {formatTime(timeLeft)}
-              </Text>
+              </Animated.Text>
             </View>
           )}
 
@@ -696,7 +766,7 @@ export default function Stop() {
               <Text
                 style={{
                   color: Theme.colors.text,
-                  fontFamily: "OnestBold",
+                  fontFamily: Theme.fonts.onestBold,
                   fontSize: 96,
                 }}
               >
@@ -712,19 +782,22 @@ export default function Stop() {
                 alignItems: "center",
               }}
             >
-              <Pressable
-                onPress={() => handleSumPoints(25)}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <Text style={styles.texts}>25</Text>
-              </Pressable>
+              {gameData?.players.length === 4 ||
+                (mode === "offline" && (
+                  <Pressable
+                    onPress={() => handleSumPoints(25)}
+                    style={({ pressed }) => [
+                      {
+                        backgroundColor: pressed
+                          ? Theme.colors.background2
+                          : Theme.colors.primary2,
+                      },
+                      styles.buttons,
+                    ]}
+                  >
+                    <Text style={styles.texts}>25</Text>
+                  </Pressable>
+                ))}
 
               <Pressable
                 onPress={() => handleSumPoints(50)}
@@ -740,19 +813,22 @@ export default function Stop() {
                 <Text style={styles.texts}>50</Text>
               </Pressable>
 
-              <Pressable
-                onPress={() => handleSumPoints(75)}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? Theme.colors.background2
-                      : Theme.colors.primary2,
-                  },
-                  styles.buttons,
-                ]}
-              >
-                <Text style={styles.texts}>75</Text>
-              </Pressable>
+              {gameData?.players.length === 3 ||
+                (mode === "offline" && (
+                  <Pressable
+                    onPress={() => handleSumPoints(75)}
+                    style={({ pressed }) => [
+                      {
+                        backgroundColor: pressed
+                          ? Theme.colors.background2
+                          : Theme.colors.primary2,
+                      },
+                      styles.buttons,
+                    ]}
+                  >
+                    <Text style={styles.texts}>75</Text>
+                  </Pressable>
+                ))}
 
               <Pressable
                 onPress={() => handleSumPoints(100)}
@@ -847,7 +923,7 @@ export default function Stop() {
       </Pressable>
 
       <BottomSheetModal title={t("players")} ref={sheetRef}>
-        <View style={{ marginBottom: 8, gap: 12 }}>
+        <View style={{ marginBottom: 8, gap: 8 }}>
           <View
             style={{
               flexDirection: "row",
@@ -859,11 +935,11 @@ export default function Stop() {
             <Text
               style={{
                 color: Theme.colors.accent,
-                fontFamily: "Onest",
+                fontFamily: Theme.fonts.onest,
                 fontSize: 16,
               }}
             >
-              {gameData?.gameId}
+              {gameData?.gameId.toUpperCase()}
             </Text>
 
             <Pressable onPress={copyRoomCode}>
@@ -875,16 +951,21 @@ export default function Stop() {
             gameData.players
               .sort((a, b) => b.points - a.points)
               .map((player) => (
-                <View
+                <Pressable
                   key={player.id}
-                  style={{
-                    padding: 16,
-                    borderRadius: 14,
-                    backgroundColor: Theme.colors.background2,
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexDirection: "row",
-                  }}
+                  onPress={() => handlePlayerInputsModal(player)}
+                  style={({ pressed }) => [
+                    {
+                      opacity: pressed ? 0.6 : 1,
+                      backgroundColor: Theme.colors.background2,
+                      padding: 16,
+                      borderRadius: 14,
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexDirection: "row",
+                      gap: 8,
+                    },
+                  ]}
                 >
                   <View
                     style={{
@@ -912,9 +993,11 @@ export default function Stop() {
                   </View>
                   <Text
                     style={{
+                      flex: 1,
                       color: Theme.colors.gray,
-                      fontFamily: "OnestBold",
+                      fontFamily: Theme.fonts.onestBold,
                       fontSize: 18,
+                      textAlign: "left",
                     }}
                   >
                     {player.name}
@@ -922,13 +1005,13 @@ export default function Stop() {
                   <Text
                     style={{
                       color: Theme.colors.gray,
-                      fontFamily: "Onest",
+                      fontFamily: Theme.fonts.onest,
                       fontSize: 18,
                     }}
                   >
                     {player.points}
                   </Text>
-                </View>
+                </Pressable>
               ))}
         </View>
       </BottomSheetModal>
@@ -946,15 +1029,23 @@ const CurrentPlayers = ({
   return (
     <Pressable
       onPress={onPress}
-      style={{
-        flexDirection: "row",
-        gap: 8,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={({ pressed }) => [
+        {
+          opacity: pressed ? 0.6 : 1,
+          flexDirection: "row",
+          gap: 8,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      ]}
     >
       <UsersIcon color={Theme.colors.accent} />
-      <Text style={{ color: Theme.colors.accent, fontFamily: "OnestBold" }}>
+      <Text
+        style={{
+          color: Theme.colors.accent,
+          fontFamily: Theme.fonts.onestBold,
+        }}
+      >
         {players}/4
       </Text>
     </Pressable>
@@ -976,7 +1067,7 @@ const styles = StyleSheet.create({
   texts: {
     color: Theme.colors.lightGray,
     alignSelf: "flex-start",
-    fontFamily: "OnestBold",
+    fontFamily: Theme.fonts.onestBold,
   },
   modalView: {
     margin: 20,
