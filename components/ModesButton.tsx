@@ -27,9 +27,7 @@ export const ModesButton = ({
       onPress={() => onPress(flag)}
       style={({ pressed }) => [
         {
-          backgroundColor: pressed
-            ? Theme.colors.background2
-            : Theme.colors.primary2,
+          opacity: pressed ? 0.6 : 1,
         },
         styles.pressables,
       ]}
@@ -79,5 +77,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 18,
+    backgroundColor: Theme.colors.primary2,
   },
 })

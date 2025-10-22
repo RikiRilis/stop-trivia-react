@@ -14,9 +14,7 @@ export const PlayingButton = ({ icon, onPress, flag }: Props) => {
       onPress={() => onPress(flag)}
       style={({ pressed }) => [
         {
-          backgroundColor: pressed
-            ? Theme.colors.background2
-            : Theme.colors.primary2,
+          opacity: pressed ? 0.6 : 1,
         },
         styles.buttons,
       ]}
@@ -28,6 +26,7 @@ export const PlayingButton = ({ icon, onPress, flag }: Props) => {
 
 const styles = StyleSheet.create({
   buttons: {
+    backgroundColor: Theme.colors.primary2,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 24,

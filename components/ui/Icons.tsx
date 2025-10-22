@@ -57,6 +57,10 @@ export const PlayIcon = (props: any) => (
   />
 )
 
+export const GithubIcon = (props: any) => (
+  <Feather name="github" color={Theme.colors.text} size={24} {...props} />
+)
+
 export const UserIcon = (props: any) => (
   <Feather name="user" color={Theme.colors.text} size={24} {...props} />
 )
@@ -72,6 +76,10 @@ export const HashIcon = (props: any) => (
     size={24}
     {...props}
   />
+)
+
+export const EditIcon = (props: any) => (
+  <Octicons name="pencil" color={Theme.colors.text} size={24} {...props} />
 )
 
 export const VerifiedIcon = (props: any) => (

@@ -24,6 +24,7 @@ export const SettingsButton = ({
           backgroundColor: pressed
             ? Theme.colors.background2
             : Theme.colors.transparent,
+          opacity: pressed ? 0.6 : 1,
         },
         styles.pressable,
       ]}

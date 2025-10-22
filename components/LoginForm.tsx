@@ -392,7 +392,10 @@ export const LoginForm = () => {
               {signInForm ? t("sign_up_question") : t("sign_in_question")}
             </Text>
 
-            <Pressable onPress={handleChangeForm}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+              onPress={handleChangeForm}
+            >
               <Text style={styles.signupText}>
                 {signInForm ? t("sign_up") : t("sign_in")}
               </Text>

@@ -207,11 +207,7 @@ export default function Index() {
                   <Pressable
                     onPress={() => handleCreateGame("online", id, 60)}
                     style={({ pressed }) => [
-                      {
-                        backgroundColor: pressed
-                          ? Theme.colors.background2
-                          : Theme.colors.primary2,
-                      },
+                      { opacity: pressed ? 0.6 : 1 },
                       styles.buttons,
                     ]}
                   >
@@ -221,11 +217,7 @@ export default function Index() {
                   <Pressable
                     onPress={() => handleCreateGame("online", id, 180)}
                     style={({ pressed }) => [
-                      {
-                        backgroundColor: pressed
-                          ? Theme.colors.background2
-                          : Theme.colors.primary2,
-                      },
+                      { opacity: pressed ? 0.6 : 1 },
                       styles.buttons,
                     ]}
                   >
@@ -235,11 +227,7 @@ export default function Index() {
                   <Pressable
                     onPress={() => handleCreateGame("online", id, 300)}
                     style={({ pressed }) => [
-                      {
-                        backgroundColor: pressed
-                          ? Theme.colors.background2
-                          : Theme.colors.primary2,
-                      },
+                      { opacity: pressed ? 0.6 : 1 },
                       styles.buttons,
                     ]}
                   >
@@ -363,6 +351,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 24,
     alignSelf: "flex-start",
+    backgroundColor: Theme.colors.primary2,
   },
   texts: {
     color: Theme.colors.lightGray,
