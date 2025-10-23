@@ -418,16 +418,14 @@ export default function Settings() {
           onPress={() => sheetRef.current?.expand()}
           title={t("language")}
           description={languageSelected === "es" ? t("es") : t("en")}
-          icon={<LanguageIcon color={Theme.colors.gray} />}
+          icon={<LanguageIcon color={Theme.colors.darkGray} />}
         />
-
-        <Divider />
 
         <SettingsButton
           onPress={handleShareApp}
           title={t("invite_friends")}
           description={t("invite_friends_desc")}
-          icon={<ShareIcon color={Theme.colors.gray} />}
+          icon={<ShareIcon color={Theme.colors.darkGray} />}
         />
 
         <SettingsButton
@@ -438,14 +436,14 @@ export default function Settings() {
           }
           title={t("rate_game")}
           description={t("rate_game_desc")}
-          icon={<StarIcon color={Theme.colors.gray} />}
+          icon={<StarIcon color={Theme.colors.darkGray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com")}
           title={t("site")}
           description={t("site_desc")}
-          icon={<WebIcon color={Theme.colors.gray} />}
+          icon={<WebIcon color={Theme.colors.darkGray} />}
         />
 
         <Divider />
@@ -453,13 +451,13 @@ export default function Settings() {
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/privacy")}
           title={t("privacy_policy")}
-          icon={<PrivacyIcon color={Theme.colors.gray} />}
+          icon={<PrivacyIcon color={Theme.colors.darkGray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://rikirilis.com/terms")}
           title={t("terms_conditions")}
-          icon={<ListIcon color={Theme.colors.gray} />}
+          icon={<ListIcon color={Theme.colors.darkGray} />}
         />
 
         <SettingsButton
@@ -467,13 +465,13 @@ export default function Settings() {
             Linking.openURL("https://github.com/RikiRilis/stop-trivia-react")
           }
           title="Github"
-          icon={<GithubIcon color={Theme.colors.gray} />}
+          icon={<GithubIcon color={Theme.colors.darkGray} />}
         />
 
         <SettingsButton
           onPress={() => Linking.openURL("https://www.rikirilis.com/#contact")}
           title="Feedback"
-          icon={<QuestionIcon color={Theme.colors.gray} />}
+          icon={<QuestionIcon color={Theme.colors.darkGray} />}
         />
 
         <Divider />
