@@ -82,6 +82,7 @@ export default function Stop() {
   const sheetRef = useRef<BottomSheet>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const countdownStarted = useRef(false)
+  const currentInputsRef = useRef(inputs)
 
   const navigation = useNavigation()
   const { getItem } = useStorage()
@@ -104,13 +105,16 @@ export default function Stop() {
   )
 
   useEffect(() => {
+    currentInputsRef.current = inputs
+  }, [inputs])
+
+  useEffect(() => {
     let gameId = id
     let gameTime = +time
     let unsubscribe: (() => void) | undefined
     let connectionUnsubscribe: (() => void) | undefined
     let backHandler: NativeEventSubscription
     let currentGameData: StopModel
-    console.log(mode, id, gameTime)
     setTimeLeft(gameTime)
 
     if (mode === "online") {
@@ -140,8 +144,8 @@ export default function Stop() {
     if (mode === "join") {
       Fire.getGame("stop", gameId).then((data) => {
         if (!data) return
-        const userName = getAuth().currentUser?.displayName
         const userId = getAuth().currentUser?.uid
+        const userName = getAuth().currentUser?.displayName
         const alreadyIn = data.players.some((p) => p.id === userId)
 
         if (!alreadyIn) {
@@ -152,6 +156,8 @@ export default function Stop() {
                 id: userId,
                 name: userName,
                 points: 0,
+                photoURL: getAuth().currentUser?.photoURL!,
+                inputs,
               },
             ],
           })
@@ -192,13 +198,16 @@ export default function Stop() {
         !countdownStarted.current
       ) {
         countdownStarted.current = true
-        handleCountdownSync(currentGameData)
+        if (!isStarting) handleCountdownSync(currentGameData)
         setTimeLeft(currentGameData.currentTime)
         setTimerColor(Theme.colors.gray)
         scaleAnim.stopAnimation()
       }
 
-      if (currentGameData.gameStatus === GameStatus.STOPPED) {
+      if (
+        currentGameData.gameStatus === GameStatus.STOPPED &&
+        countdownStarted.current
+      ) {
         countdownStarted.current = false
         setCountdown(3)
         stopTimer(currentGameData)
@@ -216,8 +225,6 @@ export default function Stop() {
     })
 
     return () => {
-      console.log("Cleaning up...")
-
       if (unsubscribe) {
         unsubscribe()
         unsubscribe = undefined
@@ -298,11 +305,12 @@ export default function Stop() {
         const randomLetter = letters.charAt(
           Math.floor(Math.random() * letters.length)
         )
+        const serverTime = await Fire.getServerTimeMs()
 
         await Fire.updateGame("stop", gameData.gameId, {
           gameStatus: GameStatus.IN_PROGRESS,
           currentLetter: randomLetter,
-          startTime: Date.now(),
+          startTime: serverTime,
         })
       }
       return
@@ -310,8 +318,7 @@ export default function Stop() {
 
     if (flag === "stop") {
       if (!gameData) return
-      stopTimer(gameData)
-      Fire.updateGame("stop", gameData.gameId, {
+      Fire.updateGame("stop", id, {
         gameStatus: GameStatus.STOPPED,
         playersReady: 1,
       })
@@ -328,15 +335,19 @@ export default function Stop() {
     }
 
     if (flag === "restart") {
-      setRestartModalVisible(true)
+      const allEmpty = Object.values(currentInputsRef.current).every(
+        (value) => !value || value.trim() === ""
+      )
+      if (!allEmpty) {
+        setRestartModalVisible(true)
+      }
     }
   }
 
-  const handleCountdownSync = (data: StopModel) => {
+  const handleCountdownSync = async (data: StopModel) => {
     let counter = 3
 
     vibrationEnabled && Vibration.vibrate(30)
-    if (timerRef.current) stopTimer(data)
     setCountdown(3)
     setIsStarting(true)
     handleRestartInputs()
@@ -345,27 +356,32 @@ export default function Stop() {
       round: data.round + 1,
     })
 
+    const offset = await Fire.getServerOffset()
+
     timerRef.current = setInterval(() => {
       vibrationEnabled && Vibration.vibrate(30)
       counter--
       setCountdown(counter)
+
       if (counter === 0) {
-        stopTimer(data)
+        stopCountDown()
+        handleTimer(data, offset)
         setCountdown(data.currentLetter)
         setLetter(data.currentLetter)
-        handleTimer(data)
         setIsStarting(false)
       }
     }, 1000)
   }
 
-  const handleTimer = (data: StopModel) => {
-    let currentTime = data.currentTime
-    let timeElapsed = Math.floor((Date.now() - data.startTime) / 1000)
-    let time = currentTime - timeElapsed
+  const handleTimer = (data: StopModel, offset: number) => {
+    stopCountDown()
+    const currentTime = data.currentTime
 
     timerRef.current = setInterval(() => {
-      time--
+      const serverNow = Date.now() + offset
+      let timeElapsed = Math.floor((serverNow - data.startTime) / 1000)
+      const time = currentTime - timeElapsed
+
       setTimeLeft(time)
 
       if (time === 3) {
@@ -377,7 +393,7 @@ export default function Stop() {
         vibrationEnabled && Vibration.vibrate(50)
       }
 
-      if (time === 0) {
+      if (time <= 0) {
         stopTimer(data)
         vibrationEnabled && Vibration.vibrate(1000)
         Fire.updateGame("stop", data.gameId, {
@@ -388,27 +404,30 @@ export default function Stop() {
     }, 1000)
   }
 
-  const stopTimer = (currentGameData: StopModel) => {
+  const stopCountDown = () => {
     if (timerRef.current) {
-      const userId = getAuth().currentUser?.uid
-      const updatedPlayers = currentGameData.players.map((player) => {
-        if (player.id === userId) {
-          return {
-            ...player,
-            inputs: inputs,
-          }
-        }
-        return player
-      })
-
-      Fire.updateGame("stop", currentGameData.gameId, {
-        players: updatedPlayers,
-      })
-
-      setReady(false)
       clearInterval(timerRef.current)
       timerRef.current = null
     }
+  }
+
+  const stopTimer = async (currentGameData: StopModel) => {
+    const userId = getAuth().currentUser?.uid
+    if (!userId) return
+
+    await Fire.updatePlayerInputs(
+      "stop",
+      currentGameData.gameId,
+      userId,
+      currentInputsRef.current
+    )
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+
+    setReady(false)
   }
 
   const handleSumPoints = (toAdd: number) => {

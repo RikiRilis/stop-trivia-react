@@ -20,17 +20,7 @@ export interface TTTModel {
   gameStatus: GameStatus
   playersReady: number
   players: Player[]
-  filledPos: [
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-  ]
+  filledPos: string[]
   host: string
   startTime: number
   timestamp: number

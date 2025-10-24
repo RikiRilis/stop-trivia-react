@@ -6,9 +6,12 @@ import {
   setDoc,
   onSnapshot,
   updateDoc,
+  serverTimestamp,
+  runTransaction,
 } from "@react-native-firebase/firestore"
 import { StopModel, GameStatus, TTTModel } from "@/interfaces/Game"
 import { Player } from "@/interfaces/Player"
+import { StopGameInputs } from "@/interfaces/StopGameInputs"
 
 const db = getFirestore()
 
@@ -47,7 +50,6 @@ class Fire {
   ) => {
     const docRef = doc(db, collectionName, id)
     await setDoc(docRef, data)
-    console.log(id)
   }
 
   getGame = async (
@@ -89,10 +91,47 @@ class Fire {
     await updateDoc(gameRef, data)
   }
 
+  updatePlayerInputs = async (
+    collection: string,
+    gameId: string,
+    userId: string,
+    inputs: StopGameInputs
+  ) => {
+    const gameRef = doc(db, collection, gameId)
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(gameRef)
+      if (!snap.exists()) return
+      const data = snap.data()
+      const players = data?.players.map((p: Player) =>
+        p.id === userId ? { ...p, inputs } : p
+      )
+      tx.update(gameRef, { players })
+    })
+  }
+
   deleteGame = async (collectionName: string, id: string) => {
     const docRef = doc(db, collectionName, id)
     await deleteDoc(docRef)
-    console.log("Deleted game:", id)
+  }
+
+  getServerTimeMs = async (): Promise<number> => {
+    const ref = doc(db, "serverTime", "sync")
+    await setDoc(ref, { now: serverTimestamp() })
+    const snap = await getDoc(ref)
+    const serverNow = snap.data()?.now?.toDate().getTime()
+    return serverNow
+  }
+
+  getServerOffset = async (): Promise<number> => {
+    const ref = doc(db, "serverTime", "sync")
+    const t0 = Date.now()
+    await setDoc(ref, { now: serverTimestamp() })
+    const snap = await getDoc(ref)
+    const t1 = Date.now()
+    const serverNow = snap.data()?.now?.toDate().getTime()
+
+    const latency = (t1 - t0) / 2
+    return serverNow - (t1 - latency)
   }
 }
 
