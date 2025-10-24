@@ -83,6 +83,7 @@ export default function Stop() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const countdownStarted = useRef(false)
   const currentInputsRef = useRef(inputs)
+  const backHandlerRef = useRef<NativeEventSubscription | null>(null)
 
   const navigation = useNavigation()
   const { getItem } = useStorage()
@@ -104,6 +105,23 @@ export default function Stop() {
     }, [])
   )
 
+  useFocusEffect(
+    useCallback(() => {
+      const backPress = () => handleBackPress()
+      backHandlerRef.current = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backPress
+      )
+
+      return () => {
+        if (backHandlerRef.current) {
+          backHandlerRef.current.remove()
+          backHandlerRef.current = null
+        }
+      }
+    }, [gameData, mode, vibrationEnabled])
+  )
+
   useEffect(() => {
     currentInputsRef.current = inputs
   }, [inputs])
@@ -113,7 +131,6 @@ export default function Stop() {
     let gameTime = +time
     let unsubscribe: (() => void) | undefined
     let connectionUnsubscribe: (() => void) | undefined
-    let backHandler: NativeEventSubscription
     let currentGameData: StopModel
     setTimeLeft(gameTime)
 
@@ -165,16 +182,6 @@ export default function Stop() {
       })
     }
 
-    if (mode === "offline") {
-      const backPress = (): boolean => {
-        return handleBackPress(currentGameData)
-      }
-
-      backHandler = BackHandler.addEventListener("hardwareBackPress", backPress)
-
-      return
-    }
-
     unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
       if (!data) {
         if (mode === "join") {
@@ -212,12 +219,6 @@ export default function Stop() {
         setCountdown(3)
         stopTimer(currentGameData)
       }
-
-      const backPress = (): boolean => {
-        return handleBackPress(currentGameData)
-      }
-
-      backHandler = BackHandler.addEventListener("hardwareBackPress", backPress)
     })
 
     connectionUnsubscribe = NetInfo.addEventListener((state) => {
@@ -236,7 +237,6 @@ export default function Stop() {
       }
 
       if (timerRef.current) clearInterval(timerRef.current)
-      if (backHandler) backHandler.remove()
 
       if (mode === "online" && gameId) {
         Fire.deleteGame("stop", gameId)
@@ -511,6 +511,17 @@ export default function Stop() {
 
   const handleOnExit = () => {
     setCloseModalVisible(false)
+
+    if (backHandlerRef.current) {
+      backHandlerRef.current.remove()
+      backHandlerRef.current = null
+    }
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+
     navigation.goBack()
   }
 
