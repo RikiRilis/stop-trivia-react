@@ -247,7 +247,26 @@ export default function Index() {
           Keyboard.dismiss()
         }}
       >
-        <View style={{ flexDirection: "row", marginVertical: 16, gap: 12 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 16,
+            marginBottom: 26,
+            gap: 12,
+          }}
+        >
+          <LottieView
+            source={ic}
+            autoPlay
+            loop={false}
+            duration={2000}
+            style={{
+              width: 24,
+              height: 24,
+            }}
+          />
+
           <Text
             style={{
               color: Theme.colors.text,
@@ -255,7 +274,7 @@ export default function Index() {
               fontFamily: Theme.fonts.onest,
             }}
           >
-            {t("choose_your_mode")}
+            {t("choose_your_mode")} Stop
           </Text>
 
           <LottieView
@@ -282,6 +301,7 @@ export default function Index() {
             title={t("play_offline")}
             subtitle={t("play_offline_desc")}
             flag="offline"
+            image="stopOffline"
             onPress={() => handlePress("offline")}
           />
           <ModesButton
@@ -297,6 +317,7 @@ export default function Index() {
             title={t("play_online")}
             subtitle={t("play_online_desc")}
             flag="online"
+            image="stopOnline"
             onPress={() => handlePress("online")}
           />
           <ModesButton
