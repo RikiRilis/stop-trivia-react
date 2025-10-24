@@ -387,7 +387,7 @@ export default function Settings() {
           onPress={toggleVibrationSwitch}
         >
           <View>
-            <VibrationIcon color={Theme.colors.gray} />
+            <VibrationIcon color={Theme.colors.darkGray} />
           </View>
 
           <View style={{ flex: 1 }}>
