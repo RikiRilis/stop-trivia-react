@@ -276,12 +276,11 @@ export default function Settings() {
             <Pressable
               onPress={handlePickImage}
               style={{
-                width: auth.currentUser?.photoURL ? 96 : 64,
-                height: auth.currentUser?.photoURL ? 96 : 64,
+                width: 96,
+                height: 96,
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundColor: Theme.colors.primary2,
-                padding: auth.currentUser?.photoURL ? 0 : 12,
                 borderRadius: 100,
                 marginBottom: 4,
                 overflow: "hidden",
@@ -299,7 +298,7 @@ export default function Settings() {
                   source={{ uri: auth.currentUser?.photoURL }}
                 />
               ) : (
-                <UserIcon size={64} color={Theme.colors.accent} />
+                <UserIcon size={76} color={Theme.colors.accent} />
               )}
             </Pressable>
 
