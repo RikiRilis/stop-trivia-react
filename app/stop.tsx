@@ -305,7 +305,7 @@ export default function Stop() {
         const randomLetter = letters.charAt(
           Math.floor(Math.random() * letters.length)
         )
-        const serverTime = await Fire.getServerTimeMs()
+        const serverTime = await Fire.getServerTimeMs(userId)
 
         await Fire.updateGame("stop", gameData.gameId, {
           gameStatus: GameStatus.IN_PROGRESS,
@@ -356,7 +356,7 @@ export default function Stop() {
       round: data.round + 1,
     })
 
-    const offset = await Fire.getServerOffset()
+    const offset = await Fire.getServerOffset(data.host)
 
     timerRef.current = setInterval(() => {
       vibrationEnabled && Vibration.vibrate(30)
@@ -376,6 +376,7 @@ export default function Stop() {
   const handleTimer = (data: StopModel, offset: number) => {
     stopCountDown()
     const currentTime = data.currentTime
+    const userId = getAuth().currentUser?.uid
 
     timerRef.current = setInterval(() => {
       const serverNow = Date.now() + offset
@@ -396,10 +397,16 @@ export default function Stop() {
       if (time <= 0) {
         stopTimer(data)
         vibrationEnabled && Vibration.vibrate(1000)
-        Fire.updateGame("stop", data.gameId, {
-          gameStatus: GameStatus.STOPPED,
-          playersReady: 1,
-        })
+
+        if (data.host === userId) {
+          Fire.updateGame("stop", data.gameId, {
+            gameStatus: GameStatus.STOPPED,
+            playersReady: 1,
+          })
+        }
+
+        setTimeLeft(0)
+        return
       }
     }, 1000)
   }

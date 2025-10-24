@@ -114,16 +114,16 @@ class Fire {
     await deleteDoc(docRef)
   }
 
-  getServerTimeMs = async (): Promise<number> => {
-    const ref = doc(db, "serverTime", "sync")
+  getServerTimeMs = async (hostId: string): Promise<number> => {
+    const ref = doc(db, "serverTime", hostId)
     await setDoc(ref, { now: serverTimestamp() })
     const snap = await getDoc(ref)
     const serverNow = snap.data()?.now?.toDate().getTime()
     return serverNow
   }
 
-  getServerOffset = async (): Promise<number> => {
-    const ref = doc(db, "serverTime", "sync")
+  getServerOffset = async (hostId: string): Promise<number> => {
+    const ref = doc(db, "serverTime", hostId)
     const t0 = Date.now()
     await setDoc(ref, { now: serverTimestamp() })
     const snap = await getDoc(ref)
