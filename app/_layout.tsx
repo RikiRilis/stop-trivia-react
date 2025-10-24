@@ -19,11 +19,16 @@ import { useTranslation } from "react-i18next"
 import { useStorage } from "@/hooks/useStorage"
 import * as RNLocalize from "react-native-localize"
 import { WaitingVerification } from "@/components/WaitingVerification"
+import { getVersion } from "react-native-device-info"
+import { FetchVersion } from "@/db/FetchVersion"
+import { AppVersionUpdate } from "@/components/AppVersionUpdate"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
+  const [isAppUpdated, setIsAppUpdated] = useState<boolean | null>(null)
   const [initializing, setInitializing] = useState(true)
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
 
   const { i18n } = useTranslation()
   const { getItem, setItem } = useStorage()
@@ -34,6 +39,8 @@ export default function Layout() {
   }
 
   useEffect(() => {
+    setLoading(true)
+
     const loadSettings = async () => {
       const locales = RNLocalize.getLocales()
       const vibration = await getItem("vibration")
@@ -41,6 +48,23 @@ export default function Layout() {
 
       if (!vibration) setItem("vibration", String(true))
       i18n.changeLanguage(languageCode ?? locales[0].languageCode)
+
+      try {
+        const currentVersion = getVersion()
+        await FetchVersion().then((version) => {
+          if (version?.version && currentVersion < version?.version) {
+            setIsAppUpdated(false)
+          } else {
+            setIsAppUpdated(true)
+          }
+
+          setLoading(false)
+        })
+      } catch (error: any) {
+        console.log("Error fetching version: ", error)
+        setIsAppUpdated(true)
+        setLoading(false)
+      }
     }
 
     loadSettings()
@@ -60,6 +84,10 @@ export default function Layout() {
         onFinish={(isCancelled) => !isCancelled && setIsAppReady(true)}
       />
     )
+  }
+
+  if (user && !isAppUpdated && loaded && isAppReady && !loading) {
+    return <AppVersionUpdate />
   }
 
   return (

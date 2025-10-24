@@ -1,4 +1,8 @@
 {
+  "update": "Actualizar",
+  "update_game": "Actualiza el juego",
+  "update_game_desc_1": "Necesitarás actualizar el juego",
+  "update_game_desc_2": "para seguir disfrutándolo.",
   "connection_lost": "Conexión perdida",
   "you_are_offline": "Estás sin conexión",
   "uploading": "Cargando...",
@@ -7,7 +11,8 @@
   "restart_inputs": "Restablecer campos",
   "restart_inputs_desc": "Esto reiniciará todos los campos y los valores ingresados. Tus puntos se conservarán. ¿Quieres continuar?",
   "players": "Jugadores",
-  "choose_your_mode": "Elige tu modo",
+  "choose_your_mode": "Elige el modo para",
+  "play_computer": "Jugar con la máquina",
   "play_offline": "Jugar sin conexión",
   "play_online": "Jugar en línea",
   "join_game": "Unirse a una partida",

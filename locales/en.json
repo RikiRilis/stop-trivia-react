@@ -1,4 +1,8 @@
 {
+  "update": "Update",
+  "update_game": "Update the game",
+  "update_game_desc_1": "You will need to update the game",
+  "update_game_desc_2": "to continue enjoying it.",
   "connection_lost": "Connection lost",
   "you_are_offline": "You are offline",
   "uploading": "Uploading...",
@@ -7,7 +11,8 @@
   "restart_inputs": "Restart inputs",
   "restart_inputs_desc": "This will restart all the inputs and the values entered. Your points will stay. Do you want to continue?",
   "players": "Players",
-  "choose_your_mode": "Choose your mode",
+  "choose_your_mode": "Choose your mode for",
+  "play_computer": "Play with computer",
   "play_offline": "Play offline",
   "play_online": "Play online",
   "join_game": "Join a game",

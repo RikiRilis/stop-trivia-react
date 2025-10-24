@@ -22,6 +22,15 @@ export const RestartIcon = (props: any) => (
   />
 )
 
+export const UpdateIcon = (props: any) => (
+  <MaterialCommunityIcons
+    name="update"
+    color={Theme.colors.text}
+    size={24}
+    {...props}
+  />
+)
+
 export const CheckIcon = (props: any) => (
   <MaterialCommunityIcons
     name="check-decagram-outline"
@@ -157,6 +166,15 @@ export const HomeIcon = (props: any) => (
 
 export const StatsIcon = (props: any) => (
   <Ionicons name="stats-chart" size={24} color={Theme.colors.text} {...props} />
+)
+
+export const ComputerIcon = (props: any) => (
+  <MaterialIcons
+    name="computer"
+    size={24}
+    color={Theme.colors.text}
+    {...props}
+  />
 )
 
 export const VibrationIcon = (props: any) => (
