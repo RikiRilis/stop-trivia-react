@@ -2,7 +2,7 @@ export default {
   expo: {
     name: "Stop Trivia Online",
     slug: "stop-trivia",
-    version: "2.2.1",
+    version: "2.3.3",
     orientation: "portrait",
     icon: "./assets/ic_brand.png",
     userInterfaceStyle: "automatic",
@@ -27,8 +27,8 @@ export default {
         predictiveBackGestureEnabled: false,
         package: "com.rilisentertainment.stoptriviaonline",
         googleServicesFile: "./google-services.json",
-        versionCode: 9,
-        version: "2.3.2",
+        versionCode: 10,
+        version: "2.3.3",
         minSdkVersion: 24,
         ndkVersion: "29.0.14206865"
     },
