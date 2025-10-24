@@ -9,6 +9,7 @@ module.exports = defineConfig([
     rules: {
       "react-hooks/exhaustive-deps": "off",
       "import/no-named-as-default-member": "off",
+      "@typescript-eslint/no-require-imports": "off",
       "semi": ["error", "never"],
     }
   }
