@@ -12,6 +12,8 @@ import {
   NativeEventSubscription,
   ActivityIndicator,
   Animated,
+  Platform,
+  StatusBar,
 } from "react-native"
 import {
   Stack,
@@ -48,6 +50,16 @@ import Clipboard from "@react-native-clipboard/clipboard"
 import NetInfo from "@react-native-community/netinfo"
 import { Player } from "@/interfaces/Player"
 import { PlayerInputsInfoModal } from "@/components/PlayerInputsInfoModal"
+import {
+  AdEventType,
+  InterstitialAd,
+  TestIds,
+} from "react-native-google-mobile-ads"
+import { Loading } from "@/components/Loading"
+
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-5333671658707378/4722063158"
 
 export default function Stop() {
   const [gameData, setGameData] = useState<StopModel | null>(null)
@@ -65,6 +77,7 @@ export default function Stop() {
   const [timerColor, setTimerColor] = useState(Theme.colors.gray)
   const [inputsPlayer, setInputsPlayer] = useState<Player | null>(null)
   const [inputsModalVisible, setInputsModalVisible] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const [inputs, setInputs] = useState({
     name: "",
     lastName: "",
@@ -88,12 +101,53 @@ export default function Stop() {
   const navigation = useNavigation()
   const { getItem } = useStorage()
   const { t } = useTranslation()
-
   const { mode, id, time } = useLocalSearchParams<{
     mode: string
     id: string
     time: string
   }>()
+
+  const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+    keywords: ["games", "gaming", "multiplayer", "action", "android"],
+  })
+
+  useEffect(() => {
+    const unsubscribeLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true)
+        if (Math.floor(Math.random() * 100) >= 50) {
+          interstitial.show()
+        }
+      }
+    )
+
+    const unsubscribeOpened = interstitial.addAdEventListener(
+      AdEventType.OPENED,
+      () => {
+        if (Platform.OS === "ios") {
+          StatusBar.setHidden(true)
+        }
+      }
+    )
+
+    const unsubscribeClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        if (Platform.OS === "ios") {
+          StatusBar.setHidden(false)
+        }
+      }
+    )
+
+    interstitial.load()
+
+    return () => {
+      unsubscribeLoaded()
+      unsubscribeOpened()
+      unsubscribeClosed()
+    }
+  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -182,44 +236,46 @@ export default function Stop() {
       })
     }
 
-    unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
-      if (!data) {
-        if (mode === "join") {
-          ToastAndroid.showWithGravity(
-            t("host_closed_game"),
-            ToastAndroid.SHORT,
-            ToastAndroid.CENTER
-          )
-          navigation.goBack()
-          if (timerRef.current) clearInterval(timerRef.current)
+    if (mode !== "offline") {
+      unsubscribe = Fire.onGameChange("stop", gameId, (data) => {
+        if (!data) {
+          if (mode === "join") {
+            ToastAndroid.showWithGravity(
+              t("host_closed_game"),
+              ToastAndroid.SHORT,
+              ToastAndroid.CENTER
+            )
+            navigation.goBack()
+            if (timerRef.current) clearInterval(timerRef.current)
+          }
+          return
         }
-        return
-      }
 
-      currentGameData = data as StopModel
-      setGameData(currentGameData)
-      setTitleByGameStatus(connection ? currentGameData.gameStatus : 3)
+        currentGameData = data as StopModel
+        setGameData(currentGameData)
+        setTitleByGameStatus(connection ? currentGameData.gameStatus : 3)
 
-      if (
-        currentGameData.gameStatus === GameStatus.IN_PROGRESS &&
-        !countdownStarted.current
-      ) {
-        countdownStarted.current = true
-        if (!isStarting) handleCountdownSync(currentGameData)
-        setTimeLeft(currentGameData.currentTime)
-        setTimerColor(Theme.colors.gray)
-        scaleAnim.stopAnimation()
-      }
+        if (
+          currentGameData.gameStatus === GameStatus.IN_PROGRESS &&
+          !countdownStarted.current
+        ) {
+          countdownStarted.current = true
+          if (!isStarting) handleCountdownSync(currentGameData)
+          setTimeLeft(currentGameData.currentTime)
+          setTimerColor(Theme.colors.gray)
+          scaleAnim.stopAnimation()
+        }
 
-      if (
-        currentGameData.gameStatus === GameStatus.STOPPED &&
-        countdownStarted.current
-      ) {
-        countdownStarted.current = false
-        setCountdown(3)
-        stopTimer(currentGameData)
-      }
-    })
+        if (
+          currentGameData.gameStatus === GameStatus.STOPPED &&
+          countdownStarted.current
+        ) {
+          countdownStarted.current = false
+          setCountdown(3)
+          stopTimer(currentGameData)
+        }
+      })
+    }
 
     connectionUnsubscribe = NetInfo.addEventListener((state) => {
       setConnection(state.isConnected ?? false)
@@ -561,9 +617,30 @@ export default function Stop() {
     setInputsModalVisible(true)
   }
 
+  if (!loaded && connection) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            headerTintColor: Theme.colors.text,
+            headerTitle: "",
+            headerTitleStyle: {
+              fontSize: 24,
+              fontFamily: Theme.fonts.onestBold,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <></>,
+            headerRight: () => <></>,
+          }}
+        />
+        <Loading />
+      </>
+    )
+  }
+
   return (
     <Screen>
-      {!connection && (
+      {!connection && mode !== "offline" && (
         <View
           style={{
             position: "absolute",
@@ -940,7 +1017,7 @@ export default function Stop() {
                   onPress={() => handlePress("stop")}
                   icon={
                     <Image
-                      source={require("@/assets/ic_brand.png")}
+                      source={require("@/assets/icons/ic_brand.png")}
                       style={{ width: 30, height: 30 }}
                     />
                   }

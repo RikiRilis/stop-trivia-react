@@ -233,7 +233,6 @@ export default function Settings() {
         flex: 1,
         backgroundColor: Theme.colors.background,
         width: "100%",
-        paddingBottom: insets.bottom,
       }}
     >
       <Stack.Screen
@@ -484,7 +483,13 @@ export default function Settings() {
           />
         )}
 
-        <View style={{ marginVertical: 8, flexDirection: "column" }}>
+        <View
+          style={{
+            flexDirection: "column",
+            marginVertical: 8,
+            marginBottom: insets.bottom,
+          }}
+        >
           <Text
             style={{
               textAlign: "center",

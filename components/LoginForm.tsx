@@ -1,5 +1,5 @@
 // components/LoginForm.tsx
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import {
   View,
   Text,
@@ -14,17 +14,13 @@ import {
   ToastAndroid,
   Vibration,
   Linking,
+  Platform,
 } from "react-native"
-import {
-  GOOGLE_AUTH_ANDROID_CLIENT_ID,
-  GOOGLE_AUTH_IOS_CLIENT_ID,
-  GOOGLE_AUTH_WEB_CLIENT_ID,
-} from "@/constants/GoogleAuth"
+import { GOOGLE_AUTH_WEB_CLIENT_ID } from "@/constants/GoogleAuth"
 import { Theme } from "@/constants/Theme"
 import {
   EyeIcon,
   EyeOffIcon,
-  GoogleIcon,
   LockIcon,
   MailIcon,
   UserIcon,
@@ -33,6 +29,7 @@ import ic from "@/assets/lotties/ic_brand.json"
 import LottieView from "lottie-react-native"
 import {
   createUserWithEmailAndPassword,
+  getAuth,
   GoogleAuthProvider,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -40,9 +37,9 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "@react-native-firebase/auth"
-import * as Google from "expo-auth-session/providers/google"
 import { auth } from "@/db/firebaseConfig"
 import { useTranslation } from "react-i18next"
+import { GoogleSignin } from "@react-native-google-signin/google-signin"
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("")
@@ -54,25 +51,32 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null)
   const [btnScale] = useState(new Animated.Value(1))
   const [signInForm, setSignInForm] = useState(true)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const { t } = useTranslation()
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_AUTH_WEB_CLIENT_ID,
-    iosClientId: GOOGLE_AUTH_IOS_CLIENT_ID,
-    androidClientId: GOOGLE_AUTH_ANDROID_CLIENT_ID,
-  })
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token } = response.params
-      const credential = GoogleAuthProvider.credential(id_token)
-      signInWithCredential(auth, credential)
+  const googleSignin = async () => {
+    try {
+      setGoogleLoading(true)
+      GoogleSignin.configure({
+        offlineAccess: false,
+        webClientId: GOOGLE_AUTH_WEB_CLIENT_ID,
+        scopes: ["profile", "email"],
+      })
+      await GoogleSignin.hasPlayServices()
+      const signInResult = await GoogleSignin.signIn()
+      const idToken = signInResult.data?.idToken
+      const googleCredentials = GoogleAuthProvider.credential(idToken)
+      await signInWithCredential(getAuth(), googleCredentials)
+    } catch (error: any) {
+      console.log(error)
+    } finally {
+      setGoogleLoading(false)
     }
-  }, [response])
+  }
 
   const handleGoogleSignIn = () => {
-    promptAsync()
+    googleSignin()
   }
 
   const validate = () => {
@@ -212,7 +216,35 @@ export const LoginForm = () => {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.wrapper}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.wrapper}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+    >
+      {googleLoading ||
+        (loading && (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: Theme.colors.backdrop,
+              justifyContent: "center",
+              alignItems: "center",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 50,
+            }}
+          >
+            <ActivityIndicator
+              size="large"
+              color={Theme.colors.accent}
+              style={{ width: 38, height: 38, alignSelf: "center" }}
+            />
+          </View>
+        ))}
+
       <Pressable style={{ flex: 1 }} onPress={() => Keyboard.dismiss()}>
         <View style={styles.container}>
           <View
@@ -402,6 +434,34 @@ export const LoginForm = () => {
             </Pressable>
           </View>
 
+          <View>
+            <Text
+              style={{
+                textAlign: "center",
+                color: Theme.colors.gray,
+                marginVertical: 24,
+              }}
+            >
+              {t("or_sign_in_with")}
+            </Text>
+
+            <Pressable
+              onPress={handleGoogleSignIn}
+              style={({ pressed }) => [
+                styles.googleBtn,
+                pressed && { opacity: 0.9 },
+                loading && { opacity: 0.8 },
+              ]}
+            >
+              <Text style={[styles.googleText, { color: "#4285F4" }]}>G</Text>
+              <Text style={[styles.googleText, { color: "#DB4437" }]}>o</Text>
+              <Text style={[styles.googleText, { color: "#F4B400" }]}>o</Text>
+              <Text style={[styles.googleText, { color: "#4285F4" }]}>g</Text>
+              <Text style={[styles.googleText, { color: "#0F9D58" }]}>l</Text>
+              <Text style={[styles.googleText, { color: "#DB4437" }]}>e</Text>
+            </Pressable>
+          </View>
+
           <View
             style={{
               flexDirection: "row",
@@ -417,30 +477,6 @@ export const LoginForm = () => {
               {t("privacy_policy")}
             </Text>
           </View>
-
-          {/* <View>
-            <Text
-              style={{
-                textAlign: "center",
-                color: Theme.colors.gray,
-                marginVertical: 24,
-              }}
-            >
-              or Sign in with
-            </Text>
-
-            <Pressable
-              onPress={handleGoogleSignIn}
-              style={({ pressed }) => [
-                styles.submit,
-                pressed && { opacity: 0.9 },
-                loading && { opacity: 0.8 },
-              ]}
-            >
-              <GoogleIcon size={24} />
-              <Text style={styles.googleText}>Google</Text>
-            </Pressable>
-          </View> */}
         </View>
       </Pressable>
     </KeyboardAvoidingView>
@@ -451,12 +487,15 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     width: "100%",
-    maxWidth: 350,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: Theme.colors.background,
   },
   container: {
     padding: 12,
     flex: 1,
+    width: "auto",
+    maxWidth: 350,
     justifyContent: "center",
   },
   title: {
@@ -492,10 +531,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
-  },
-  rememberBtn: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   forgotText: {
     color: Theme.colors.primary,
@@ -579,15 +614,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Theme.colors.accent,
+    borderWidth: 1,
+    borderColor: Theme.colors.primary2,
+    backgroundColor: Theme.colors.modal,
     paddingVertical: 12,
     borderRadius: 14,
     marginBottom: 12,
-    gap: 8,
   },
   googleText: {
-    color: Theme.colors.text,
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: Theme.fonts.onestBold,
   },
 })

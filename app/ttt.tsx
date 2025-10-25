@@ -3,6 +3,7 @@ import {
   BackIcon,
   CheckIcon,
   CopyIcon,
+  OfflineIcon,
   PlayIcon,
   RestartIcon,
   UserIcon,
@@ -26,11 +27,14 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
+  ActivityIndicator,
   Animated,
   BackHandler,
   Image,
   NativeEventSubscription,
+  Platform,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -41,7 +45,16 @@ import { BottomSheetModal } from "@/components/BottomSheetModal"
 import Clipboard from "@react-native-clipboard/clipboard"
 import { Screen } from "@/components/ui/Screen"
 import { PlayingButton } from "@/components/PlayingButton"
+import {
+  AdEventType,
+  InterstitialAd,
+  TestIds,
+} from "react-native-google-mobile-ads"
+import { Loading } from "@/components/Loading"
 
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-5333671658707378/4722063158"
 const initialBoard = Array(9).fill("")
 
 export default function TTT() {
@@ -55,6 +68,7 @@ export default function TTT() {
   const [winnerText, setWinnerText] = useState<string | null>(null)
   const [winner, setWinner] = useState<string | null>(null)
   const [board, setBoard] = useState(initialBoard)
+  const [loaded, setLoaded] = useState(false)
   const [btnScales] = useState(() =>
     initialBoard.map(() => new Animated.Value(1))
   )
@@ -84,6 +98,46 @@ export default function TTT() {
       useNativeDriver: true,
     }).start()
   }
+
+  const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+    keywords: ["games", "gaming", "multiplayer", "action", "android"],
+  })
+
+  useEffect(() => {
+    const unsubscribeLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true)
+        interstitial.show()
+      }
+    )
+
+    const unsubscribeOpened = interstitial.addAdEventListener(
+      AdEventType.OPENED,
+      () => {
+        if (Platform.OS === "ios") {
+          StatusBar.setHidden(true)
+        }
+      }
+    )
+
+    const unsubscribeClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        if (Platform.OS === "ios") {
+          StatusBar.setHidden(false)
+        }
+      }
+    )
+
+    interstitial.load()
+
+    return () => {
+      unsubscribeLoaded()
+      unsubscribeOpened()
+      unsubscribeClosed()
+    }
+  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -355,19 +409,63 @@ export default function TTT() {
     )
   }
 
+  if (!loaded && connection) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            headerTintColor: Theme.colors.text,
+            headerTitle: "",
+            headerTitleStyle: {
+              fontSize: 24,
+              fontFamily: Theme.fonts.onestBold,
+            },
+            headerTitleAlign: "center",
+            headerLeft: () => <></>,
+            headerRight: () => <></>,
+          }}
+        />
+        <Loading />
+      </>
+    )
+  }
+
   return (
     <Screen>
-      <CustomModal
-        title={t("close_room")}
-        description={
-          mode !== "join" ? t("close_room_desc") : t("close_room_join_desc")
-        }
-        modalVisible={closeModalVisible}
-        onRequestClose={() => {
-          setCloseModalVisible(!closeModalVisible)
-        }}
-        onAccept={handleOnExit}
-      />
+      {!connection && mode !== "offline" && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: Theme.colors.backdrop,
+            zIndex: 10,
+            gap: 16,
+          }}
+        >
+          <OfflineIcon size={64} color={Theme.colors.accent} />
+
+          <Text
+            style={{
+              color: Theme.colors.accent,
+              fontFamily: Theme.fonts.onestBold,
+              fontSize: 24,
+            }}
+          >
+            {t("you_are_offline")}
+          </Text>
+
+          <ActivityIndicator
+            size="large"
+            color={Theme.colors.accent}
+            style={{ width: 38, height: 38, alignSelf: "center" }}
+          />
+        </View>
+      )}
 
       <Stack.Screen
         options={{
@@ -391,6 +489,18 @@ export default function TTT() {
                 )
               : () => <></>,
         }}
+      />
+
+      <CustomModal
+        title={t("close_room")}
+        description={
+          mode !== "join" ? t("close_room_desc") : t("close_room_join_desc")
+        }
+        modalVisible={closeModalVisible}
+        onRequestClose={() => {
+          setCloseModalVisible(!closeModalVisible)
+        }}
+        onAccept={handleOnExit}
       />
 
       <View

@@ -11,10 +11,6 @@ import { Theme } from "@/constants/Theme"
 import SplashScreen from "@/components/ui/SplashScreen"
 import { auth } from "@/db/firebaseConfig"
 import { LoginForm } from "@/components/LoginForm"
-import {
-  FirebaseAuthTypes,
-  onAuthStateChanged,
-} from "@react-native-firebase/auth"
 import { useTranslation } from "react-i18next"
 import { useStorage } from "@/hooks/useStorage"
 import * as RNLocalize from "react-native-localize"
@@ -22,6 +18,11 @@ import { WaitingVerification } from "@/components/WaitingVerification"
 import { getVersion } from "react-native-device-info"
 import { FetchVersion } from "@/db/FetchVersion"
 import { AppVersionUpdate } from "@/components/AppVersionUpdate"
+import mobileAds from "react-native-google-mobile-ads"
+import {
+  FirebaseAuthTypes,
+  onAuthStateChanged,
+} from "@react-native-firebase/auth"
 
 export default function Layout() {
   const [isAppReady, setIsAppReady] = useState(false)
@@ -60,6 +61,8 @@ export default function Layout() {
 
           setLoading(false)
         })
+
+        await mobileAds().initialize()
       } catch (error: any) {
         console.log("Error fetching version: ", error)
         setIsAppUpdated(true)
@@ -124,7 +127,7 @@ export default function Layout() {
                 },
                 headerLeft: () => (
                   <Image
-                    source={require("@/assets/ic_brand.png")}
+                    source={require("@/assets/icons/ic_brand.png")}
                     style={{ width: 40, height: 40 }}
                   />
                 ),

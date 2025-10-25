@@ -13,6 +13,7 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: Theme.colors.background,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
